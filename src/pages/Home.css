@@ -1,0 +1,99 @@
+/* Overall container for the home page */
+.home-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Profile section */
+  .profile-section {
+    background-color: #ECE6F0;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .profile-info {
+    max-width: 70%;
+  }
+  
+  .profile-info h2 {
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+  
+  .role {
+    font-size: 16px;
+    color: gray;
+  }
+  
+  .goals {
+    font-size: 16px;
+    margin-top: 10px;
+  }
+  
+  .goal-description {
+    color: gray;
+    font-size: 14px;
+  }
+  
+  .view-profile-btn {
+    padding: 10px 20px;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .view-profile-btn:hover {
+    background-color: #333;
+  }
+  
+  /* Meetings section */
+  .meetings-section {
+    margin-top: 40px;
+  }
+  
+  .meetings-section h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+  }
+  
+  .meetings-container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .meeting-card {
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    width: 30%;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .meeting-card p {
+    margin: 5px 0;
+  }
+  
+  .meeting-card span {
+    display: block;
+    margin: 5px 0;
+    color: gray;
+    font-size: 14px;
+  }
+  
+  /* Footer message */
+  .footer-message {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    text-align: center;
+    color: gray;
+    font-size: 16px;
+    border-radius: 8px;
+  }
