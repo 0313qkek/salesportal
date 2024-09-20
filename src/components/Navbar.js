@@ -14,6 +14,7 @@ function Navbar() {
     return (
         <>
             <IconContext.Provider value={{ color: '#000' }}>
+                {/* Top Bar with Menu Icon */}
                 <div className={sidebar? 'navbar-shifted' :'navbar'}>
                     <Link to="#" className='menu-bars'>
                         <IoMenu onClick={showSidebar} />
@@ -24,6 +25,8 @@ function Navbar() {
                         <span className='welcome'>Welcome back to Bunchful Sales Portal.</span>
                     </p>
                 </div>
+
+                {/* Sidebar Navigation */}
                 <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
                     <ul className='nav-menu-items' onClick={showSidebar}>
                         <li className='navbar-toggle'>
@@ -39,6 +42,18 @@ function Navbar() {
                                 </li>
                             );
                         })}
+
+                        <li className="user-profile">
+                            <img
+                                className="user-pic"
+                                src="https://via.placeholder.com/40"
+                                alt="User Profile"
+                            />
+                            <span className='user-details'>
+                                <span className="user-name">Thomas Laub</span>
+                                <span className="user-email">tlaub@bunchful.com</span>
+                            </span>
+                        </li>
                     </ul>
                 </nav>
                 <div className={sidebar ? 'main-content-shifted' : 'main-content'}>
