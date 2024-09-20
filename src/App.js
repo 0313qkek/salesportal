@@ -20,19 +20,6 @@ function App() {
     <>
     <Router>
       <Navbar />
-      <Routes>
-        <Route path='/dashboard' element={<Dashboard />}/>
-        <Route path='/products' element={<Products />}/>
-        <Route path='/Customer' element={<Customer />}/>
-        <Route path='/Order' element={<Order />}/>
-        <Route path='/Resourcehub' element={<Resourcehub />}/>
-        <Route path='/Salestraining' element={<Salestraining />}/>
-        <Route path='/Competitor' element={<Competitor />}/>
-        <Route path='/Messages' element={<Messages />}/>
-        <Route path='/Sharedfiles' element={<Sharedfiles />}/>
-        <Route path='/Salesscript' element={<Salesscript />}/>
-        <Route path='/Mailwizz' element={<Mailwizz />}/>
-      </Routes>
     </Router>
     </>
   )
