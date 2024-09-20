@@ -5,6 +5,17 @@ import { SidebarData } from './SidebarData';
 import './Navbar.css';
 import { IconContext } from 'react-icons';
 import Home from '../pages/Home';
+import Dashboard from '../pages/Dashboard';
+import Products from '../pages/Products';
+import Customer from '../pages/Customer';
+import Order from '../pages/Order';
+import Resourcehub from '../pages/Resourcehub';
+import Salestraining from '../pages/Salestraining';
+import Competitor from '../pages/Competitor';
+import Messages from '../pages/Messages';
+import Sharedfiles from '../pages/Sharedfiles';
+import Salesscript from '../pages/Salesscript';
+import Mailwizz from '../pages/Mailwizz';
 
 function Navbar() {
     const [sidebar, setSidebar] = useState(false)
@@ -26,7 +37,6 @@ function Navbar() {
                     </p>
                 </div>
 
-                {/* Sidebar Navigation */}
                 <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
                     <ul className='nav-menu-items' onClick={showSidebar}>
                         <li className='navbar-toggle'>
@@ -58,7 +68,18 @@ function Navbar() {
                 </nav>
                 <div className={sidebar ? 'main-content-shifted' : 'main-content'}>
                     <Routes>
-                        <Route path='/' element={<Home />}/>
+                        <Route path='/' element={<Home />} />
+                        <Route path='/dashboard' element={<Dashboard />} />
+                        <Route path='/products' element={<Products />} />
+                        <Route path='/Customer' element={<Customer />} />
+                        <Route path='/Order' element={<Order />} />
+                        <Route path='/Resourcehub' element={<Resourcehub />} />
+                        <Route path='/Salestraining' element={<Salestraining />} />
+                        <Route path='/Competitor' element={<Competitor />} />
+                        <Route path='/Messages' element={<Messages />} />
+                        <Route path='/Sharedfiles' element={<Sharedfiles />} />
+                        <Route path='/Salesscript' element={<Salesscript />} />
+                        <Route path='/Mailwizz' element={<Mailwizz />} />
                     </Routes>
                 </div>
             </IconContext.Provider>
