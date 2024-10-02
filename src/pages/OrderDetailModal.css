@@ -1,0 +1,68 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 60%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .order-detail-grid {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .order-detail-items, .order-summary {
+    flex: 1;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  .order-detail-items table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .order-detail-items th,
+  .order-detail-items td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .customer-info {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+  }
+  
+  .status {
+    font-weight: bold;
+    color: green;
+  }
+  
+  .close-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #ff4b4b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }

@@ -1,0 +1,69 @@
+.shared-files-container {
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  h2 {
+    margin-bottom: 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 24px;
+  }
+  
+  .files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
+    gap: 20px;
+  }
+  
+  .file-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .file-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .file-name {
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
+  .file-size,
+  .file-type,
+  .file-date {
+    color: gray;
+    font-size: 14px;
+    margin: 3px 0;
+  }
+  
+  .file-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  
+  .action-btn {
+    background-color: #6c63ff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .action-btn:hover {
+    background-color: #5a52d1;
+  }

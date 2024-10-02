@@ -16,6 +16,7 @@ import Messages from '../pages/Messages';
 import Sharedfiles from '../pages/Sharedfiles';
 import Salesscript from '../pages/Salesscript';
 import Mailwizz from '../pages/Mailwizz';
+import Settings from '../pages/Settings';
 
 function Navbar() {
     const [sidebar, setSidebar] = useState(false)
@@ -78,8 +79,9 @@ function Navbar() {
                         <Route path='/Competitor' element={<Competitor />} />
                         <Route path='/Messages' element={<Messages />} />
                         <Route path='/Sharedfiles' element={<Sharedfiles />} />
-                        <Route path='/Salesscript' element={<Salesscript />} />
+                        <Route path='/Salesscriptlibrary' element={<Salesscript />} />
                         <Route path='/Mailwizz' element={<Mailwizz />} />
+                        <Route path='/Settings' element={<Settings />} />
                     </Routes>
                 </div>
             </IconContext.Provider>
