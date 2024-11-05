@@ -20,12 +20,6 @@ const dailyData = [
   { day: 'Sat', BunchfulAtlas: 4300, BunchfulMeCard: 2300 },
 ];
 
-// Low Stock Alerts Data
-const lowStockData = [
-  { product: 'Bunchful Badge', qty: 8 },
-  { product: 'Bunchful MeCard', qty: 15 },
-];
-
 // Recent Orders Data
 const ordersData = [
   { orderId: 12345, product: 'Bunchful Atlas', time: '12/25/2024, 01:10', status: 'Pending', qty: 'x1', customer: 'Thomas Laub' },

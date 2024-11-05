@@ -4,6 +4,8 @@ import { Link, Route, Routes } from 'react-router-dom';
 import { NavbarData } from './NavbarData';
 import './Navbar.css';
 import Logo from '../assets/Bunchful_Logo.png';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
 import Home from '../pages/Home';
 import Dashboard from '../pages/Dashboard';
 import Products from '../pages/Products';
@@ -66,8 +68,10 @@ function Navbar() {
             <div className={sidebar ? 'main-content-shifted' : 'main-content'}>
                 <Routes>
                     <Route path='/' element={<Home />} />
-                    <Route path='/dashboard' element={<Dashboard />} />
-                    <Route path='/products' element={<Products />} />
+                    <Route path='/Login' element={<Login />} />
+                    <Route path='/Register' element={<Register />} />
+                    <Route path='/Dashboard' element={<Dashboard />} />
+                    <Route path='/Products' element={<Products />} />
                     <Route path='/Customer' element={<Customer />} />
                     <Route path='/Order' element={<Order />} />
                     <Route path='/Resourcehub' element={<Resourcehub />} />
