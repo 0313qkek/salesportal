@@ -1,90 +1,161 @@
+/* Container */
 .customer-container {
-    display: flex;
-    gap: 20px;
-    padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+/* Customer Table */
+.customer-table {
+  flex: 1;
+  margin-right: 20px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  overflow-x: auto;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Search section */
+.search-section {
+  margin-bottom: 10px;
+}
+
+.search-bar {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 200px;
+}
+
+/* Sort section */
+.sort-section {
+  margin-bottom: 20px;
+}
+
+.sort-dropdown {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f8f8f8;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+table tbody tr:hover {
+  background-color: #ECE6F0;
+  cursor: pointer;
+}
+
+.selected {
+  background-color: #ECE6F0;
+}
+
+/* Customer Details */
+.customer-details {
+  flex: 1;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.edit-btn {
+  padding: 5px 10px;
+  border: none;
+  background-color: #ECE6F0;
+  color: black;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Edit Form */
+.edit-form label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.edit-form input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.save-btn {
+  margin-top: 20px;
+  padding: 10px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.customer-info p {
+  margin: 5px 0;
+  color: #333;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .customer-container {
+      flex-direction: column;
+      padding: 10px;
   }
-  
-  .customer-list {
-    flex: 1;
-    background-color: white;
-    border-radius: 10px;
-    padding: 20px;
-    border: 1px solid #ddd;
-  }
-  
-  .customer-search-sort {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .search-bar {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-left: 10px;
-    width: 200px;
-  }
-  
-  .sort-dropdown {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #f8f8f8;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-  
-  table th, table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  table tbody tr:hover {
-    background-color: #ECE6F0;
-    cursor: pointer;
-  }
-  
+
+  .customer-table,
   .customer-details {
-    flex: 1;
-    background-color: white;
-    border-radius: 10px;
-    padding: 20px;
-    border: 1px solid #ddd;
+      width: 100%;
+      margin-bottom: 20px;
+      padding: 15px;
   }
-  
-  .detail-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+
+  .search-bar,
+  .sort-dropdown {
+      width: 100%;
+      margin-left: 0;
+      margin-top: 10px;
   }
-  
-  .edit-btn {
-    padding: 5px 10px;
-    border: none;
-    background-color: #ece6f0;
-    color: black;
-    border-radius: 5px;
-    cursor: pointer;
+
+  .table-header {
+      flex-direction: column;
+      align-items: flex-start;
   }
-  
-  .reviews-section, .payments-section {
-    margin-top: 20px;
+
+  .edit-form label, .customer-info p {
+      font-size: 14px;
   }
-  
-  .review-item {
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
+
+  .save-btn {
+      width: 100%;
   }
-  
-  .reviews-section h4, .payments-section h4 {
-    margin-bottom: 10px;
+
+  table th, table td {
+      padding: 8px;
   }
+}

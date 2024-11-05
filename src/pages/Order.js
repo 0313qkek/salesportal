@@ -1,50 +1,55 @@
 import React, { useState } from 'react';
 import './Order.css';
-import OrderDetailModal from './OrderDetailModal';
-
-const ordersData = [
-  { id: '#0001', name: 'Brooklyn Zoe', address: '224 W 35th St, New York, NY 10001', email: 'tlaub@bunchful.com', phone: '(540)123-4567', date: '08-26-2024', price: '$120', status: 'Pending' },
-  { id: '#0002', name: 'Brooklyn Zoe', address: '224 W 35th St, New York, NY 10001', email: 'tlaub@bunchful.com', phone: '(540)123-4567', date: '08-26-2024', price: '$360', status: 'Completed' },
-  { id: '#0003', name: 'Brooklyn Zoe', address: '224 W 35th St, New York, NY 10001', email: 'tlaub@bunchful.com', phone: '(540)123-4567', date: '08-26-2024', price: '$120', status: 'Pending' },
-  { id: '#0004', name: 'Brooklyn Zoe', address: '224 W 35th St, New York, NY 10001', email: 'tlaub@bunchful.com', phone: '(540)123-4567', date: '08-26-2024', price: '$120', status: 'Canceled' },
-  { id: '#0005', name: 'Brooklyn Zoe', address: '224 W 35th St, New York, NY 10001', email: 'tlaub@bunchful.com', phone: '(540)123-4567', date: '08-26-2024', price: '$120', status: 'Pending' },
-];
 
 function Orders() {
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortCategory, setSortCategory] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState(null); // Track selected order
-  const [isModalOpen, setIsModalOpen] = useState(false); // Track modal state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({});
+
+  const orders = [
+    { id: '#1001', product: 'Bunchful Atlas', name: 'Alice Johnson', email: 'alice@bunchful.com', phone: '(123) 456-7890', date: '08-26-2024' },
+    { id: '#1002', product: 'Bunchful MeCard', name: 'Bob Smith', email: 'bob@bunchful.com', phone: '(321) 654-0987', date: '08-27-2024' },
+    { id: '#1003', product: 'Bunchful Badge', name: 'Carol White', email: 'carol@bunchful.com', phone: '(111) 222-3333', date: '08-28-2024' },
+    { id: '#1004', product: 'Bunchful Atlas', name: 'David Brown', email: 'david@bunchful.com', phone: '(444) 555-6666', date: '08-29-2024' }
+  ];
+
+  const handleOrderClick = (order) => {
+    setSelectedOrder(order);
+    setEditData(order);
+    setIsEditing(false);
+  };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  const handleSortChange = (e) => {
+  const handleCategoryChange = (e) => {
     setSortCategory(e.target.value);
   };
 
-  // Open modal and set the selected order
-  const handleOrderClick = (order) => {
-    setSelectedOrder(order);
-    setIsModalOpen(true);
+  const handleEditClick = () => {
+    setIsEditing(!isEditing);
   };
 
-  // Close modal
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedOrder(null);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData({ ...editData, [name]: value });
   };
 
-  // Sort orders based on the selected sort category
-  const sortedOrders = [...ordersData].sort((a, b) => {
+  const handleSaveClick = () => {
+    console.log("Saved data:", editData);
+    setIsEditing(false);
+    setSelectedOrder(editData);
+  };
+
+  const sortedOrders = [...orders].sort((a, b) => {
     switch (sortCategory) {
       case 'name':
         return a.name.localeCompare(b.name);
       case 'email':
         return a.email.localeCompare(b.email);
-      case 'phone':
-        return a.phone.localeCompare(b.phone);
       case 'date':
         return new Date(a.date) - new Date(b.date);
       default:
@@ -52,63 +57,140 @@ function Orders() {
     }
   });
 
-  // Filter orders by search term
   const filteredOrders = sortedOrders.filter((order) =>
     order.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="orders-container">
-      <h2>Orders</h2>
-      <div className="orders-search-sort">
-        <select onChange={handleSortChange} className="sort-dropdown">
-          <option value="">Sort By</option>
-          <option value="name">Name</option>
-          <option value="email">Email</option>
-          <option value="phone">Phone Number</option>
-          <option value="date">Date</option>
-        </select>
-        <input
-          type="text"
-          className="search-bar"
-          placeholder="Search by Name"
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Email</th>
-            <th>Phone Number</th>
-            <th>Date</th>
-            <th>Price</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredOrders.map((order) => (
-            <tr key={order.id} onClick={() => handleOrderClick(order)}>
-              <td>{order.id}</td>
-              <td>{order.name}</td>
-              <td>{order.address}</td>
-              <td>{order.email}</td>
-              <td>{order.phone}</td>
-              <td>{order.date}</td>
-              <td>{order.price}</td>
-              <td>{order.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className='orders-container'>
+      <div className='orders-table'>
+        <div className='table-header'>
+          <h2>Orders</h2>
+          <input
+            type="text"
+            placeholder="Search by Customer Name"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="search-bar"
+          />
+          <select onChange={handleCategoryChange} className="sort-dropdown">
+            <option value="">Default</option>
+            <option value="name">Customer Name</option>
+            <option value="email">Email</option>
+            <option value="date">Date</option>
+          </select>
+        </div>
 
-      {/* Modal for showing order details */}
-      {isModalOpen && selectedOrder && (
-        <OrderDetailModal order={selectedOrder} closeModal={closeModal} />
-      )}
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Product</th>
+              <th>Customer Name</th>
+              <th>Email</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredOrders.map((order) => (
+              <tr
+                key={order.id}
+                onClick={() => handleOrderClick(order)}
+                className={selectedOrder && selectedOrder.id === order.id ? 'selected' : ''}
+              >
+                <td>{order.id}</td>
+                <td>{order.product}</td>
+                <td>{order.name}</td>
+                <td>{order.email}</td>
+                <td>{order.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="order-detail">
+        {selectedOrder ? (
+          <>
+            <div className="detail-header">
+              <h3>{selectedOrder.name}</h3>
+              <button onClick={handleEditClick} className="edit-btn">
+                {isEditing ? 'Cancel' : 'Edit'}
+              </button>
+            </div>
+            {isEditing ? (
+              <div className="edit-form">
+                <label>
+                  Order ID:
+                  <input
+                    type="text"
+                    name="id"
+                    value={editData.id}
+                    onChange={handleInputChange}
+                    disabled
+                  />
+                </label>
+                <label>
+                  Product:
+                  <input
+                    type="text"
+                    name="product"
+                    value={editData.product}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <label>
+                  Customer Name:
+                  <input
+                    type="text"
+                    name="name"
+                    value={editData.name}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <label>
+                  Email:
+                  <input
+                    type="email"
+                    name="email"
+                    value={editData.email}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <label>
+                  Phone Number:
+                  <input
+                    type="text"
+                    name="phone"
+                    value={editData.phone}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <label>
+                  Date:
+                  <input
+                    type="text"
+                    name="date"
+                    value={editData.date}
+                    disabled
+                  />
+                </label>
+                <button onClick={handleSaveClick} className="save-btn">Save</button>
+              </div>
+            ) : (
+              <>
+                <p><strong>Order ID:</strong> {selectedOrder.id}</p>
+                <p><strong>Product:</strong> {selectedOrder.product}</p>
+                <p><strong>Email:</strong> {selectedOrder.email}</p>
+                <p><strong>Phone Number:</strong> {selectedOrder.phone}</p>
+                <p><strong>Date:</strong> {selectedOrder.date}</p>
+              </>
+            )}
+          </>
+        ) : (
+          <p>Please select an order to view details</p>
+        )}
+      </div>
     </div>
   );
 }

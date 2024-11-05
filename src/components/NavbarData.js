@@ -15,7 +15,7 @@ import {
     FaEnvelopeOpenText,
 } from 'react-icons/fa';
 
-export const SidebarData = [
+export const NavbarData = [
     {
         title: 'Home',
         path: '/',

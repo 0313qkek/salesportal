@@ -1,3 +1,28 @@
+/* Container */
+.products-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+/* Product Table */
+.products-table {
+    flex: 1;
+    margin-right: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    overflow-x: auto;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
 /* Search section */
 .search-section {
     margin-bottom: 10px;
@@ -7,7 +32,6 @@
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    margin-left: 10px;
     width: 200px;
 }
 
@@ -50,31 +74,6 @@
 
 .action-buttons button:hover {
     background-color: #d6cfe1;
-}
-
-/* Container */
-.products-container {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-}
-
-/* Product Table */
-.products-table {
-    flex: 1;
-    margin-right: 20px;
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    overflow-x: auto;
-}
-
-.table-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
 }
 
 .action-buttons button {
@@ -175,4 +174,49 @@ table tbody tr:hover {
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 10px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .products-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .products-table,
+    .product-detail {
+        width: 100%;
+        margin-bottom: 20px;
+        padding: 15px;
+    }
+
+    .search-bar,
+    .sort-dropdown {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .action-buttons {
+        margin-top: 10px;
+    }
+
+    .product-images {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    table th, table td {
+        padding: 8px;
+    }
+
+    .review-item {
+        padding: 8px;
+        font-size: 14px;
+    }
 }

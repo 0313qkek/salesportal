@@ -4,7 +4,8 @@
   display: flex;
   align-items: center;
   padding: 0 1rem;
-  border: 0.5px solid gray;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-shifted {
@@ -13,74 +14,59 @@
   display: flex;
   align-items: center;
   padding: 0 1rem;
-  border: 0.5px solid gray;
   margin-left: 250px;
   width: calc(100% - 250px);
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-toggler {
+  font-size: 30px;
+  cursor: pointer;
 }
 
 .title .user-name {
-  font-family: "Inter", Helvetica;
   font-size: 30px;
   font-weight: 600;
+  margin-left: 20px;
 }
 
 .title .welcome {
   color: gray;
-}
-
-.menu-bars {
-  margin-left: 2rem;
-  font-size: 2rem;
-  background: none;
+  margin-left: 20px;
 }
 
 .nav-menu {
   background-color: #ffffff;
   width: 250px;
-  height: 100vh;
+  height: 100%;
   display: flex;
   justify-content: center;
   position: fixed;
   top: 0;
   left: -100%;
   transition: 350ms;
-  border: 0.5px solid gray;
   overflow-y: auto;
   scrollbar-width: thin;
-}
-
-.nav-menu::-webkit-scrollbar {
-  width: 8px;
-}
-
-.nav-menu::-webkit-scrollbar-thumb {
-  background-color: #888;
-  border-radius: 10px;
-}
-
-.nav-menu::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
 }
 
 .nav-menu.active {
   left: 0;
   transition: 350ms;
-  
 }
 
 .user-profile {
   display: flex;
   align-items: center;
-  padding: 20px;
   background-color: #ffffff;
   border-top: 1px solid #e0e0e0;
+  padding: 20px;
 }
 
 .user-pic {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background-color: #e0e0e0; /* Placeholder grey background */
 }
 
 .user-details {
@@ -129,6 +115,10 @@
   width: 100%;
 }
 
+.nav-menu-items span {
+  margin-left: 20px;
+}
+
 .navbar-toggle {
   background-color: #ffffff;;
   width: 100%;
@@ -158,6 +148,68 @@
   width: calc(100% - 250px);
 }
 
-span {
-  margin-left: 16px;;
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 1rem;
+    height: 60px;
+  }
+
+  .sidebar-toggler {
+    font-size: 26px;
+  }
+
+  /* Adjust sidebar to full-screen overlay on mobile */
+  .nav-menu {
+    width: 100%;
+    height: 100vh;
+    left: -100%;
+    transition: left 0.3s ease;
+    z-index: 2;  /* Sidebar is on top */
+  }
+
+  .nav-menu.active {
+    left: 0;
+  }
+
+  .navbar-shifted,
+  .main-content-shifted {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .title .user-name {
+    font-size: 20px;
+  }
+
+  .title .welcome {
+    font-size: 14px;
+  }
+
+  /* Font sizes and padding adjustments for sidebar items */
+  .nav-text {
+    padding: 12px;
+  }
+
+  .nav-text a {
+    font-size: 16px;
+  }
+
+  .user-profile {
+    padding: 15px;
+  }
+
+  .user-name {
+    font-size: 14px;
+  }
+
+  .user-email {
+    font-size: 12px;
+  }
+  
+  .bunchful-logo {
+    width: 120px;  /* Adjust width for mobile */
+    height: auto;  /* Maintain aspect ratio */
+    margin: 10px auto;
+  }
 }

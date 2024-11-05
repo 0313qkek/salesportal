@@ -140,3 +140,58 @@
   table tbody tr:hover {
     background-color: #ece6f0;
   }
+
+  /* Mobile-Friendly Adjustments */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      grid-template-columns: 1fr;
+      padding: 10px;
+    }
+  
+    .metrics-row,
+    .charts-row,
+    .orders-products-row {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .metric-box,
+    .chart-box,
+    .recent-orders,
+    .top-products {
+      width: 100%;
+      padding: 10px;
+    }
+  
+    .metric-box h3, 
+    .chart-box h3, 
+    .recent-orders h3, 
+    .top-products h3 {
+      font-size: 18px;
+    }
+  
+    .metric-box p {
+      font-size: 20px;
+    }
+  
+    /* Adjust Time Filters */
+    .time-filters {
+      justify-content: center;
+    }
+  
+    .time-filters span {
+      font-size: 12px;
+      margin: 0 8px;
+    }
+  
+    /* Adjust table cells */
+    table th,
+    table td {
+      padding: 8px;
+      font-size: 10px;
+    }
+  
+    .alerts-grid {
+      grid-template-columns: 1fr;
+    }
+  }

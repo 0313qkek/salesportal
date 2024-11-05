@@ -1,141 +1,118 @@
-/* Settings Page Styling */
 .settings-page {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    height: 100vh;
-    padding: 20px;
-  }
-  
-  .settings-container {
-    width: 80%;
-    max-width: 800px;
-    background-color: white;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .settings-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 30px;
-    color: #333;
-  }
-  
-  .settings-section {
-    margin-bottom: 30px;
-  }
-  
-  h3 {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #555;
-  }
-  
-  p {
-    font-size: 14px;
-    color: #666;
-  }
-  
-  .profile-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 10px;
-  }
-  
-  .profile-details {
-    flex: 1;
-    margin-right: 20px;
-  }
-  
-  .settings-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    background-color: #f7f7f7;
-    outline: none;
-  }
-  
-  .settings-input:focus {
-    border-color: #6c63ff;
-  }
-  
-  .contact-inputs {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-  
-  .contact-inputs label {
-    flex: 1;
-    margin-right: 20px;
-    font-weight: bold;
-    font-size: 14px;
-  }
-  
-  .profile-picture-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .profile-picture {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background-color: #e0e0e0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-  }
-  
-  .profile-picture img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  
-  .update-btn {
-    background-color: #6c63ff;
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .update-btn:hover {
-    background-color: #574fbf;
-  }
-  
-  .security-notice {
-    font-size: 12px;
-    color: #888;
-  }
-  
-  .save-changes-container {
-    text-align: right;
-    margin-top: 20px;
-  }
-  
-  .save-btn {
-    background-color: #6c63ff;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .save-btn:hover {
-    background-color: #574fbf;
-  }
+  padding: 20px;
+}
+
+.settings-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 600px;
+  margin: auto;
+  border: 1px solid #ddd;
+}
+
+.settings-title {
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+}
+
+.password-inputs label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+.settings-input {
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.update-btn {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.update-btn:hover {
+  background-color: #45a049;
+}
+
+/* Dark Mode styles */
+.settings-page.dark-mode {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+
+.settings-page.dark-mode .settings-container {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+}
+
+.settings-page.dark-mode .settings-input {
+  background-color: #333;
+  color: #f1f1f1;
+}
+
+.settings-page.dark-mode .update-btn {
+  background-color: #777;
+}
+
+.settings-page.dark-mode .update-btn:hover {
+  background-color: #555;
+}
+
+/* Dark Mode Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}

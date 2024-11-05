@@ -1,8 +1,6 @@
 .resource-hub-container {
     padding: 20px;
     background-color: white;
-    border-radius: 10px;
-    border: 1px solid #ddd;
   }
   
   h2 {
@@ -10,6 +8,7 @@
     text-align: left;
     font-weight: 600;
     font-size: 24px;
+    margin-left: 10px;
   }
   
   .resource-grid {
@@ -34,7 +33,7 @@
   }
   
   .resource-card:hover {
-    transform: translateY(-5px); /* Hover effect */
+    transform: translateY(-5px);
   }
   
   .resource-image {
