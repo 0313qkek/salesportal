@@ -11,13 +11,41 @@ function Register() {
     const navigate = useNavigate();
 
     const handleBackToSignIn = () => {
-        navigate('/Login');
+        navigate('/');
+    };
+
+    const handleRegister = async (e) => {
+        e.preventDefault();
+
+        if (password !== password2) {
+            alert("Passwords do not match");
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:4000/users/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, phone, password, password2 }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert(data.message || "Registration successful!");
+                navigate('/');
+            } else {
+                alert(data.message || "Registration failed. Please try again.");
+            }
+        } catch (error) {
+            alert("An error occurred. Please try again later.");
+        }
     };
 
     return (
         <div className='register-container'>
             <h2>Register</h2>
-            <form className='register-form'>
+            <form onSubmit={handleRegister} className='register-form'>
                 <div className='section'>
                     <h3>Your Profile</h3>
                     <p>Choose how you are displayed</p>

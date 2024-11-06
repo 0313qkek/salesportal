@@ -4,10 +4,31 @@ import { Link } from 'react-router-dom';
 import Logo from '../assets/Bunchful_Logo.png';
 import { IoEye, IoEyeOff } from "react-icons/io5";
 
-function Login() {
+function Login({ onLogin }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+    
+        try {
+            const response = await fetch('http://localhost:4000/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                onLogin(); // Redirect to dashboard
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            alert("Login failed");
+        }
+    };
 
     return (
         <div className='login-container'>
@@ -17,7 +38,7 @@ function Login() {
                 <p>Sign in to Bunchful Sales Portal</p>
             </div>
             <div className='login-right'>
-                <form className='login-form'>
+                <form onSubmit={handleLogin}className='login-form'>
                     <h3>Pleace enter your login details</h3>
                     <label>Email Address</label>
                     <input 

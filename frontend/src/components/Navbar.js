@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IoMenu } from "react-icons/io5";
-import { Link, Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes, useNavigate, Navigate } from 'react-router-dom';
 import { NavbarData } from './NavbarData';
+import { jwtDecode } from 'jwt-decode';
 import './Navbar.css';
 import Logo from '../assets/Bunchful_Logo.png';
 import Login from '../pages/Login';
@@ -21,71 +22,116 @@ import Mailwizz from '../pages/Mailwizz';
 import Settings from '../pages/Settings';
 
 function Navbar() {
-    const [sidebar, setSidebar] = useState(false)
+    const [sidebar, setSidebar] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userName, setUserName] = useState('');
+    const [userEmail, setUserEmail] = useState('');
+    const navigate = useNavigate();
 
-    const showSidebar = () => setSidebar(!sidebar)
+    const showSidebar = () => setSidebar(!sidebar);
+
+    const handleLogin = () => {
+        setIsAuthenticated(true);
+        navigate('/home');
+    };
+
+    const handleLogout = () => {
+        setIsAuthenticated(false);
+        localStorage.removeItem('token');
+        navigate('/');
+    };
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                setUserName(decoded.name);
+                setUserEmail(decoded.email);
+                setIsAuthenticated(true);
+            } catch (err) {
+                setIsAuthenticated(false);
+            }
+        }
+    }, []);
 
     return (
         <>
-            <div className={sidebar ? 'navbar-shifted' : 'navbar'}>
-                <IoMenu className='sidebar-toggler' onClick={showSidebar} />
-                <p className='title'>
-                    <span className='user-name'>Hello Thomas!</span>
-                    <br />
-                    <span className='welcome'>Welcome back to Bunchful Sales Portal.</span>
-                </p>
-            </div>
+            {isAuthenticated ? (
+                <>
+                    <div className={sidebar ? 'navbar-shifted' : 'navbar'}>
+                        <IoMenu className='sidebar-toggler' onClick={showSidebar} />
+                        <p className='title'>
+                            <span className='user-name'>Hello {userName}!</span>
+                            <br />
+                            <span className='welcome'>Welcome back to Bunchful Sales Portal.</span>
+                        </p>
+                    </div>
 
-            <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
-                <ul className='nav-menu-items' onClick={showSidebar}>
-                    <li className='navbar-toggle'>
-                        <img className='bunchful-logo' alt="Bunchful logo" src={Logo} />
-                    </li>
-                    {NavbarData.map((item, index) => {
-                        return (
-                            <li key={index} className={item.cName}>
-                                <Link to={item.path}>
-                                    {item.icon}
-                                    <span>{item.title}</span>
-                                </Link>
+                    <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
+                        <ul className='nav-menu-items' onClick={showSidebar}>
+                            <li className='navbar-toggle'>
+                                <img className='bunchful-logo' alt="Bunchful logo" src={Logo} />
                             </li>
-                        );
-                    })}
+                            {NavbarData.map((item, index) => (
+                                item.path === '/logout' ? (
+                                    <li key={index} className={item.cName} onClick={handleLogout}>
+                                        <Link to='/'>
+                                            {item.icon}
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </li>
+                                ) : (
+                                    <li key={index} className={item.cName}>
+                                        <Link to={item.path}>
+                                            {item.icon}
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </li>
+                                )
+                            ))}
 
-                    <li className="user-profile">
-                        <img
-                            className="user-pic"
-                            src="https://via.placeholder.com/40"
-                            alt="User Profile"
-                        />
-                        <span className='user-details'>
-                            <span className="user-name">Thomas Laub</span>
-                            <span className="user-email">tlaub@bunchful.com</span>
-                        </span>
-                    </li>
-                </ul>
-            </nav>
-            <div className={sidebar ? 'main-content-shifted' : 'main-content'}>
+                            <li className="user-profile">
+                                <img
+                                    className="user-pic"
+                                    src="https://via.placeholder.com/40"
+                                    alt="User Profile"
+                                />
+                                <span className='user-details'>
+                                    <span className="user-name">{userName}</span>
+                                    <span className="user-email">{userEmail}</span>
+                                </span>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <div className={sidebar ? 'main-content-shifted' : 'main-content'}>
+                        <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/home" element={<Home />} />
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/products" element={<Products />} />
+                            <Route path="/customer" element={<Customer />} />
+                            <Route path="/order" element={<Order />} />
+                            <Route path="/resourcehub" element={<Resourcehub />} />
+                            <Route path="/salestraining" element={<Salestraining />} />
+                            <Route path="/competitor" element={<Competitor />} />
+                            <Route path="/messages" element={<Messages />} />
+                            <Route path="/sharedfiles" element={<Sharedfiles />} />
+                            <Route path="/salesscriptlibrary" element={<Salesscript />} />
+                            <Route path="/mailwizz" element={<Mailwizz />} />
+                            <Route path="/settings" element={<Settings />} />
+                        </Routes>
+                    </div>
+                </>
+            ) : (
                 <Routes>
-                    <Route path='/' element={<Home />} />
-                    <Route path='/Login' element={<Login />} />
-                    <Route path='/Register' element={<Register />} />
-                    <Route path='/Dashboard' element={<Dashboard />} />
-                    <Route path='/Products' element={<Products />} />
-                    <Route path='/Customer' element={<Customer />} />
-                    <Route path='/Order' element={<Order />} />
-                    <Route path='/Resourcehub' element={<Resourcehub />} />
-                    <Route path='/Salestraining' element={<Salestraining />} />
-                    <Route path='/Competitor' element={<Competitor />} />
-                    <Route path='/Messages' element={<Messages />} />
-                    <Route path='/Sharedfiles' element={<Sharedfiles />} />
-                    <Route path='/Salesscriptlibrary' element={<Salesscript />} />
-                    <Route path='/Mailwizz' element={<Mailwizz />} />
-                    <Route path='/Settings' element={<Settings />} />
+                    <Route path="/" element={<Login onLogin={handleLogin} />} />
+                    <Route path="/register" element={<Register />} />
                 </Routes>
-            </div>
+            )}
         </>
-    )
+    );
 }
 
-export default Navbar
+export default Navbar;
