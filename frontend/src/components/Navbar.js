@@ -37,6 +37,8 @@ function Navbar() {
 
     const handleLogout = () => {
         setIsAuthenticated(false);
+        setUserName('');
+        setUserEmail('');
         localStorage.removeItem('token');
         navigate('/');
     };
@@ -53,7 +55,7 @@ function Navbar() {
                 setIsAuthenticated(false);
             }
         }
-    }, []);
+    }, [isAuthenticated]);
 
     return (
         <>
@@ -107,7 +109,7 @@ function Navbar() {
 
                     <div className={sidebar ? 'main-content-shifted' : 'main-content'}>
                         <Routes>
-                            <Route path="/" element={<Home />} />
+                            <Route path="/" element={<Navigate to="/home" />} />
                             <Route path="/home" element={<Home />} />
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/products" element={<Products />} />

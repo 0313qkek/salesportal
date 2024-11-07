@@ -76,7 +76,7 @@ app.post("/users/register", async (req, res) => {
     let errors = [];
 
     if (!name || !email || !password || !password2) {
-        errors.push({ message: "Please enter all fields"});
+        errors.push({ message: "Please enter all fields" });
     }
 
     if (password.length < 6) {
@@ -91,11 +91,28 @@ app.post("/users/register", async (req, res) => {
         return res.status(400).json({ errors });
     }
 
-    try {
+    // Check if user already exists
+    pool.query(`SELECT * FROM users WHERE email =$1`, [email], (err, results) => {
+        if (err) throw err;
 
-    } catch (error) {
+        if (results.rows.lenght > 0) {
+            return res.status(400).json({ message: "User with that email already exists" });
+        } else {
+            // Hash password and insert new user
+            bcrypt.hash(password, 10, (err, hash) => {
+                if (err) throw err;
 
-    }
+                pool.query(
+                    `INSERT INTO users (name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING id, name, email`,
+                    [name, email, phone, hash],
+                    (err, result) => {
+                        if (err) throw err;
+                        res.status(201).json({ message: "User registered successfully", user: result.rows[0 ]});
+                    }
+                );
+            });
+        }
+    });
 });
 
 // Serve the React app for any other routes

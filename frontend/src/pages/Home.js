@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Home.css';
 import ProfileModal from '../components/ProfileModal';
 import MeetingModal from '../components/MeetingModal';
+import { jwtDecode } from 'jwt-decode';
 
 function Home() {
   const initialMeetings = [
@@ -35,6 +36,7 @@ function Home() {
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [meetings, setMeetings] = useState(initialMeetings);
   const [selectedMeetingId, setSelectedMeetingId] = useState(null);
+  const [userName, setUserName] = useState('');
 
   const handleViewProfile = () => {
     setIsProfileModalOpen(true);
@@ -61,6 +63,17 @@ function Home() {
     setSelectedMeetingId(id === selectedMeetingId ? null : id);
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUserName(decoded.name);
+      } catch (err) {
+        console.error('Token decoding failed:', err);
+      }
+    }
+  }, []);
 
   return (
     <div className="home-container">
@@ -69,7 +82,7 @@ function Home() {
         <div className="profile-info">
           <img className="profile-picture" src="https://via.placeholder.com/100" alt="Profile" />
           <div className="profile-details">
-            <h2>Thomas Laub</h2>
+            <h2>{userName}</h2>
             <p className="role">Sales Team Member</p>
             <p className="goals">Goals:</p>
             <p className="goal-description">
