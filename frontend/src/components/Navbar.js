@@ -24,7 +24,8 @@ import Settings from '../pages/Settings';
 function Navbar() {
     const [sidebar, setSidebar] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userName, setUserName] = useState('');
+    const [userFirstName, setUserFirstName] = useState('');
+    const [userLastName, setUserLastName] = useState('');
     const [userEmail, setUserEmail] = useState('');
     const navigate = useNavigate();
 
@@ -37,7 +38,7 @@ function Navbar() {
 
     const handleLogout = () => {
         setIsAuthenticated(false);
-        setUserName('');
+        setUserFirstName('');
         setUserEmail('');
         localStorage.removeItem('token');
         navigate('/');
@@ -48,7 +49,8 @@ function Navbar() {
         if (token) {
             try {
                 const decoded = jwtDecode(token);
-                setUserName(decoded.name);
+                setUserFirstName(decoded.firstName);
+                setUserLastName(decoded.lastName);
                 setUserEmail(decoded.email);
                 setIsAuthenticated(true);
             } catch (err) {
@@ -64,7 +66,7 @@ function Navbar() {
                     <div className={sidebar ? 'navbar-shifted' : 'navbar'}>
                         <IoMenu className='sidebar-toggler' onClick={showSidebar} />
                         <p className='title'>
-                            <span className='user-name'>Hello {userName}!</span>
+                            <span className='user-name'>Hello {userFirstName}!</span>
                             <br />
                             <span className='welcome'>Welcome back to Bunchful Sales Portal.</span>
                         </p>
@@ -100,7 +102,7 @@ function Navbar() {
                                     alt="User Profile"
                                 />
                                 <span className='user-details'>
-                                    <span className="user-name">{userName}</span>
+                                    <span className="user-name">{userFirstName} {userLastName}</span>
                                     <span className="user-email">{userEmail}</span>
                                 </span>
                             </li>

@@ -17,7 +17,7 @@ initializePassport(passport);
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(cors());
+app.use(cors()); 
 
 app.use(
     session({
@@ -39,18 +39,33 @@ app.post('/users/login', async (req, res) => {
 
     try {
         pool.query(`SELECT * FROM users WHERE email = $1`, [email], (err, results) => {
-            if (err) throw err;
+            if (err) {
+                console.error("Error querying database:", err);
+                return res.status(500).json({ message: "Server error" });
+            }
 
             if (results.rows.length > 0) {
                 const user = results.rows[0];
 
                 bcrypt.compare(password, user.password, (err, isMatch) => {
-                    if (err) throw err;
+                    if (err) {
+                        console.error("Error comparing passwords:", err);
+                        return res.status(500).json({ message: "Server error" });
+                    }
 
                     if (isMatch) {
-                        const token = jwt.sign({ userId: user.id, name: user.name, email: user.email, phone: user.phone }, process.env.JWT_SECRET, {
-                            expiresIn: "1h",
-                        });
+                        const token = jwt.sign(
+                            { 
+                                userId: user.id, 
+                                firstName: user.firstname, 
+                                lastName: user.lastname, 
+                                email: user.email, 
+                                phone: user.phone, 
+                                role: user.role 
+                            }, 
+                            process.env.JWT_SECRET, 
+                            { expiresIn: "1h" }
+                        );
 
                         res.json({
                             message: "Login successful",
@@ -66,25 +81,25 @@ app.post('/users/login', async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ message: "Server error"});
+        console.error("Server error during login:", error);
+        res.status(500).json({ message: "Server error" });
     }
 });
 
 app.post("/users/register", async (req, res) => {
-    const { name, email, phone, password, password2 } = req.body;
-
+    const { firstName, lastName, email, phone, role, password, password2 } = req.body;
     let errors = [];
 
-    if (!name || !email || !password || !password2) {
+    if (!firstName || !lastName || !email || !password || !password2 || !role || !phone) {
         errors.push({ message: "Please enter all fields" });
     }
 
     if (password.length < 6) {
-        errors.push({ message: "Password must be at least 6 characters long"});
+        errors.push({ message: "Password must be at least 6 characters long" });
     }
 
     if (password !== password2) {
-        errors.push({ message: "Passwords do not match"});
+        errors.push({ message: "Passwords do not match" });
     }
 
     if (errors.length > 0) {
@@ -93,21 +108,32 @@ app.post("/users/register", async (req, res) => {
 
     // Check if user already exists
     pool.query(`SELECT * FROM users WHERE email =$1`, [email], (err, results) => {
-        if (err) throw err;
+        if (err) {
+            console.error("Error querying database for existing user:", err);
+            return res.status(500).json({ message: "Server error" });
+        }
 
-        if (results.rows.lenght > 0) {
+        if (results.rows.length > 0) {
             return res.status(400).json({ message: "User with that email already exists" });
         } else {
             // Hash password and insert new user
             bcrypt.hash(password, 10, (err, hash) => {
-                if (err) throw err;
+                if (err) {
+                    console.error("Error hashing password:", err);
+                    return res.status(500).json({ message: "Server error" });
+                }
 
                 pool.query(
-                    `INSERT INTO users (name, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING id, name, email`,
-                    [name, email, phone, hash],
+                    `INSERT INTO users (firstName, lastName, email, phone, role, password) 
+                    VALUES ($1, $2, $3, $4, $5, $6) 
+                    RETURNING id, firstName, lastName, email, phone, role`,
+                    [firstName, lastName, email, phone, role, hash],
                     (err, result) => {
-                        if (err) throw err;
-                        res.status(201).json({ message: "User registered successfully", user: result.rows[0 ]});
+                        if (err) {
+                            console.error("Error inserting new user:", err);
+                            return res.status(500).json({ message: "Server error" });
+                        }
+                        res.status(201).json({ message: "User registered successfully", user: result.rows[0] });
                     }
                 );
             });
@@ -116,8 +142,8 @@ app.post("/users/register", async (req, res) => {
 });
 
 // Serve the React app for any other routes
-app.get("/", (req, res) => {
-    res.send("Welcome to the Bunchful Sales Portal API");
+app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../frontend/build", "index.html"));
 });
 
 // Start the server

@@ -36,8 +36,10 @@ function Home() {
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [meetings, setMeetings] = useState(initialMeetings);
   const [selectedMeetingId, setSelectedMeetingId] = useState(null);
-  const [userName, setUserName] = useState('');
-
+  const [userFirstName, setUserFirstName] = useState('');
+  const [userLastName, setUserLastName] = useState('');
+  const [userRole, setUserRole] = useState('');
+ 
   const handleViewProfile = () => {
     setIsProfileModalOpen(true);
   };
@@ -68,7 +70,9 @@ function Home() {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setUserName(decoded.name);
+        setUserFirstName(decoded.firstName);
+        setUserLastName(decoded.lastName);
+        setUserRole(decoded.role);
       } catch (err) {
         console.error('Token decoding failed:', err);
       }
@@ -82,8 +86,8 @@ function Home() {
         <div className="profile-info">
           <img className="profile-picture" src="https://via.placeholder.com/100" alt="Profile" />
           <div className="profile-details">
-            <h2>{userName}</h2>
-            <p className="role">Sales Team Member</p>
+            <h2>{userFirstName} {userLastName}</h2>
+            <p className="role">{userRole}</p>
             <p className="goals">Goals:</p>
             <p className="goal-description">
               When you upload your personalized goal on the profile, it will show up in here.

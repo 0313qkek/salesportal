@@ -3,9 +3,11 @@ import './Register.css';
 import { useNavigate } from 'react-router-dom';
 
 function Register() {
-    const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
+    const [role, setRole] = useState('user');
     const [password, setPassword] = useState('');
     const [password2, setPassword2] = useState('');
     const navigate = useNavigate();
@@ -26,7 +28,7 @@ function Register() {
             const response = await fetch('http://localhost:4000/users/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, phone, password, password2 }),
+                body: JSON.stringify({ firstName, lastName, email, phone, role, password, password2 }),
             });
 
             const data = await response.json();
@@ -49,13 +51,32 @@ function Register() {
                 <div className='section'>
                     <h3>Your Profile</h3>
                     <p>Choose how you are displayed</p>
-                    <label>Name</label>
-                    <input 
+                    <label>First Name</label>
+                    <input
                         type='text'
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
                         required
                     />
+                    <label>Last Name</label>
+                    <input
+                        type='text'
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                    />
+                    <label>Role</label>
+                    <select
+                        value={role}
+                        onChange={(e) => {
+                            setRole(e.target.value);
+                        }}
+                        required
+                    >
+                        <option value="user">User</option>
+                        <option value="manager">Manager</option>
+                        <option value="guest">Guest</option>
+                    </select>
                 </div>
 
                 <div className='section'>

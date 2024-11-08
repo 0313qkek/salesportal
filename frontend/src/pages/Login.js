@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Login.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, Navigate} from 'react-router-dom';
 import Logo from '../assets/Bunchful_Logo.png';
 import { IoEye, IoEyeOff } from "react-icons/io5";
 
@@ -8,6 +8,7 @@ function Login({ onLogin }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -19,9 +20,11 @@ function Login({ onLogin }) {
                 body: JSON.stringify({ email, password }),
             });
             const data = await response.json();
+
             if (response.ok) {
                 localStorage.setItem('token', data.token);
-                onLogin(); // Redirect to dashboard
+                onLogin();
+                navigate('/home');
             } else {
                 alert(data.message);
             }
