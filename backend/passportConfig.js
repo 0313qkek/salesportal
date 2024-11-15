@@ -1,8 +1,10 @@
 const LocalStrategy = require("passport-local").Strategy;
 const { pool } = require("./dbConfig");
 const bcrypt = require("bcrypt");
+const { OIDCStrategy } = require('passport-azure-ad');
 
 function initialize(passport) {
+    // Local Strategy
     const authenticateUser = (email, password, done) => {
         pool.query(
             `SELECT * FROM users WHERE email = $1`, [email], (error, results) => {
@@ -35,6 +37,38 @@ function initialize(passport) {
         new LocalStrategy(
             { usernameField: "email", passwordField: "password"},
             authenticateUser
+        )
+    );
+
+    // Azure AD OIDC Strategy
+    passport.use(
+        new OIDCStrategy(
+            {
+                identityMetadata: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/v2.0/.well-known/openid-configuration`,
+                clientID: process.env.AZURE_CLIENT_ID,
+                clientSecret: process.env.AZURE_CLIENT_SECRET,
+                responseType: "code",
+                responseMode: "form_post",
+                redirectUrl: 'http://localhost:4000/auth/microsoft/callback',
+                allowHttpForRedirectUrl: true,
+                scope: ["openid", "profile", "email", "Calendars.Read"],
+            },
+            async (accessToken, refreshToken, profile, done) => {
+                try {
+                    const user = {
+                        microsoftId: profile.oid,
+                        email: profile._json.email,
+                        name: profile.displayName,
+                        accessToken,
+                        refreshToken
+                    };
+
+                    await saveOrUpdateUserWithMicrosoftInfo(user);
+                    return done(null, { profile, accessToken });
+                } catch (err) {
+                    return done(err);
+                }
+            }
         )
     );
 

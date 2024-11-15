@@ -27,6 +27,7 @@ function Navbar() {
     const [userFirstName, setUserFirstName] = useState('');
     const [userLastName, setUserLastName] = useState('');
     const [userEmail, setUserEmail] = useState('');
+    const [userPicture, setUserPicture] = useState('');
     const navigate = useNavigate();
 
     const showSidebar = () => setSidebar(!sidebar);
@@ -52,6 +53,7 @@ function Navbar() {
                 setUserFirstName(decoded.firstName);
                 setUserLastName(decoded.lastName);
                 setUserEmail(decoded.email);
+                setUserPicture(decoded.picture);
                 setIsAuthenticated(true);
             } catch (err) {
                 setIsAuthenticated(false);
@@ -98,7 +100,7 @@ function Navbar() {
                             <li className="user-profile">
                                 <img
                                     className="user-pic"
-                                    src="https://via.placeholder.com/40"
+                                    src={userPicture}
                                     alt="User Profile"
                                 />
                                 <span className='user-details'>

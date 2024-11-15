@@ -60,7 +60,7 @@
     margin: 5px 0 15px;
 }
 
-.upload-btn {
+.file {
     padding: 10px 20px;
     background-color: black;
     color: white;
@@ -69,7 +69,7 @@
     cursor: pointer;
 }
 
-.upload-btn:hover {
+.file:hover {
     background-color: #333;
 }
 

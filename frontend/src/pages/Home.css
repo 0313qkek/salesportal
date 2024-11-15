@@ -66,135 +66,24 @@
   .view-profile-btn:hover {
     background-color: #333;
   }
-  
+
   .meetings-section {
-    margin-top: 40px;
+    width: 100%;
+    margin-top: 20px;
   }
 
   .meetings-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-  }
-  
-  .meetings-section h2 {
-    font-size: 24px;
-    margin-bottom: 15px;
-  }
-
-  .add-meeting-btn {
-    padding: 10px 20px;
-    background-color: black;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: 20px;
     margin-bottom: 10px;
   }
 
-  .add-meeting-btn:hover {
-    background-color: #333;
-  }
-  
-  .meetings-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px; /* Control the gap between meeting cards */
-    justify-content: start;
-  }
-  
-  .meeting-card {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease-in-out;
-    max-width: 250px;
-    margin-top: 10px;
+  .meetings-header h2 {
+    font-size: 24px;
+    color: #333;
   }
 
-  .meeting-card:hover {
-    transform: translateY(-5px);
-    cursor: pointer;
-  }
-
-  .meeting-tooltip {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #d2d2d2;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    white-space: nowrap;
-    font-size: 14px;
-    z-index: 1;
-    margin-top: 20px;
-}
-
-.meeting-tooltip p {
-  color: black;
-}
-
-.meeting-card:hover .meeting-tooltip {
-    display: block;
-}
-
-.delete-btn {
-  margin-top: 10px;
-  padding: 8px 12px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.delete-btn:hover {
-  background-color: #c0392b;
-}
-  .meeting-details {
-    font-size: 16px;
-    font-weight: 500;
-    padding: 5px;
-    border-radius: 5px;
-  }
-  
-  .meeting-title {
-    font-weight: bold;
-    margin-bottom: 8px;
-    color:#333
-  }
-  
-  .meeting-date {
-    color: rgb(51, 50, 50);
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-  
-  .meeting-client {
-    color: rgb(91, 86, 86);
-    font-size: 14px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .client-dot {
-    width: 4px;
-    height: 4px;
-    background-color: rgb(75, 71, 71);
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 5px;
-  }
-  
   .footer-message {
     margin-top: 40px;
     padding: 20px;
@@ -225,10 +114,5 @@
       margin-top: 25px;
       text-align: center;
       width: 100%;
-    }
-
-    .meetings-grid {
-      margin-top: 15px;
-      justify-items: center;
     }
   }
