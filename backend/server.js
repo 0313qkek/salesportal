@@ -9,9 +9,18 @@ const flash = require("express-flash");
 const cors = require("cors");
 require("dotenv").config();
 const multer = require("multer");
-const fetch = require('node-fetch');
-const { saveOrUpdateUserWithMicrosoftInfo } = require('./userService');
+const { msalConfig, REDIRECT_URI } = require('./authConfig');
+const { ConfidentialClientApplication } = require('@azure/msal-node');
+const authRoutes = require('./routes/authRoutes');
+const https = require('https');
+const fs = require('fs');
 
+const key = fs.readFileSync('server.key'); // Path to private key
+const cert = fs.readFileSync('server.cert'); // Path to certificate
+
+const options = { key, cert };
+
+const msalClient = new ConfidentialClientApplication(msalConfig);
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -33,18 +42,20 @@ const authenticateJWT = (req, res, next) => {
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
             if (err) {
-                return res.sendStatus(403); // Forbidden
+                console.error("JWT verification failed:", err.message);
+                return res.status(403).json({ error: "Forbidden" });
             }
-            req.userId = decoded.userId; // Assign directly to req
+            req.userId = decoded.userId;
             req.accessToken = decoded.accessToken;
             next();
         });
     } else {
-        res.sendStatus(401); // Unauthorized if no token
+        console.warn("No token provided");
+        res.status(401).json({ error: "Unauthorized" });
     }
 };
 
-
+app.use('/auth', authRoutes);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors()); 
@@ -55,9 +66,9 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: false, // Ensures the cookie is only sent over HTTPS
-            sameSite: 'None', // Allows cross-site cookies for third-party use
-        },
+            secure: false,
+            httpOnly: true,
+        }
     })
 );
 
@@ -101,7 +112,7 @@ app.post('/users/login', async (req, res) => {
                                 picture: user.picture,
                             }, 
                             process.env.JWT_SECRET, 
-                            { expiresIn: "1h" }
+                            { expiresIn: "12h" }
                         );
 
                         res.json({
@@ -161,10 +172,10 @@ app.post("/users/register", async (req, res) => {
                 }
 
                 pool.query(
-                    `INSERT INTO users (firstName, lastName, email, phone, role, password, picture, microsoft_id, access_token) 
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-                    RETURNING id, firstName, lastName, email, phone, role, picture, microsoft_id, access_token`,
-                    [firstName, lastName, email, phone, role, hash, defaultPicture, microsoft_id, accessToken],
+                    `INSERT INTO users (firstName, lastName, email, phone, role, password, picture) 
+                    VALUES ($1, $2, $3, $4, $5, $6, $7) 
+                    RETURNING id, firstName, lastName, email, phone, role, picture`,
+                    [firstName, lastName, email, phone, role, hash, defaultPicture],
                     (err, result) => {
                         if (err) {
                             console.error("Error inserting new user:", err);
@@ -211,7 +222,7 @@ app.post("/users/update-profile", upload.single("profilePicture"), authenticateJ
                 role: updatedUser.role,
             },
             process.env.JWT_SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "12h" }
         );
 
         res.status(200).json({ message: "Profile updated successfully", user: updatedUser, token: newToken });
@@ -221,12 +232,136 @@ app.post("/users/update-profile", upload.single("profilePicture"), authenticateJ
     }
 });
 
+// Microsoft Authentication
+app.get('/auth/microsoft', async (req, res) => {
+    try {
+        const authUrl = await msalClient.getAuthCodeUrl({
+            scopes: ['User.Read', 'Calendars.Read'], // Add scopes based on your app's requirements
+            redirectUri: REDIRECT_URI,
+        });
+        console.log('Success!!');
+        res.redirect(authUrl);
+    } catch (err) {
+        console.error('Error generating auth URL:', err);
+        res.status(500).send('Error generating auth URL.');
+    }
+});
+
+app.get('/auth/microsoft/callback', async (req, res) => {
+    try {
+        const code = req.query.code; // Extract the authorization code
+        if (!code) {
+            throw new Error("Authorization code not found");
+        }
+
+        const tokenResponse = await msalClient.acquireTokenByCode({
+            code: code,
+            redirectUri: REDIRECT_URI,
+            scopes: ['User.Read', 'Calendars.Read'],
+        });
+
+        const { accessToken, refreshToken, idTokenClaims } = tokenResponse;
+        const microsoftId = idTokenClaims.oid;
+        const email = idTokenClaims.preferred_username;
+
+        // Check if the user already exists
+        const existingUser = await pool.query(`SELECT * FROM users WHERE email = $1`, [email]);
+
+        if (existingUser.rows.length > 0) {
+            // Update existing user
+            await pool.query(
+                `UPDATE users SET microsoft_id = $1, access_token = $2, refresh_token = $3 WHERE email = $4`,
+                [microsoftId, accessToken, refreshToken, email]
+            );
+            console.log(`Updated user: ${email}`);
+        } else {
+            // Insert new user
+            await pool.query(
+                `INSERT INTO users (microsoft_id, email, access_token, refresh_token) VALUES ($1, $2, $3, $4)`,
+                [microsoftId, email, accessToken, refreshToken]
+            );
+            console.log(`Inserted new user: ${email}`);
+        }
+
+        // Generate a JWT for the user
+        const token = jwt.sign(
+            { userId: microsoftId, email, accessToken },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.redirect(`https://localhost:4000/home?token=${token}`);
+    } catch (error) {
+        console.error("Error during Microsoft callback:", error);
+        res.status(500).send("Authentication error.");
+    }
+});
+
+
+// Refresh Token Endpoint
+app.post('/refresh-token', async (req, res) => {
+    const { refreshToken } = req.body;
+    if (!refreshToken) return res.status(400).json({ error: "Refresh token is required" });
+
+    try {
+        const tokenResponse = await msalClient.acquireTokenByRefreshToken({
+            refreshToken: refreshToken,
+            scopes: ['User.Read', 'Calendars.Read'],
+        });
+
+        res.json({ accessToken: tokenResponse.accessToken });
+    } catch (error) {
+        console.error("Error refreshing token:", error);
+        res.status(500).json({ error: "Failed to refresh token" });
+    }
+});
+
+// Check Microsoft Connection
+app.get('/users/check-connection', authenticateJWT, async (req, res) => {
+    try {
+        console.log("Checking Microsoft connection for user:", req.userId);
+        
+        // Use the `microsoft_id` column for UUID-based lookups
+        const result = await pool.query(
+            `SELECT microsoft_id FROM users WHERE microsoft_id = $1`,
+            [req.userId]
+        );
+
+        res.json({ connected: !!result.rows[0]?.microsoft_id });
+    } catch (err) {
+        console.error("Error checking Microsoft connection:", err);
+        res.status(500).json({ error: "Error checking connection" });
+    }
+});
+
+// Fetch Calendar Events
+app.get('/calendar', authenticateJWT, async (req, res) => {
+    try {
+        const result = await pool.query(`SELECT access_token FROM users WHERE microsoft_id = $1`, [req.userId]);
+        const accessToken = result.rows[0]?.access_token;
+
+        if (!accessToken) return res.status(404).json({ error: "Access token not found." });
+
+        const calendarResponse = await fetch("https://graph.microsoft.com/v1.0/me/calendar/events", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!calendarResponse.ok) throw new Error("Failed to fetch calendar events");
+
+        const calendarData = await calendarResponse.json();
+        res.json(calendarData.value);
+    } catch (err) {
+        console.error("Error fetching calendar:", err);
+        res.status(500).json({ error: "Error fetching calendar data" });
+    }
+});
+
 // Serve the React app for any other routes
 app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "../frontend/build", "index.html"));
 });
 
 // Start the server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+https.createServer(options, app).listen(PORT, () => {
+    console.log(`Secure server running on https://localhost:${PORT}`);
 });
