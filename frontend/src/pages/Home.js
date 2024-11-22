@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 import ProfileModal from '../components/ProfileModal';
+import CalendarView from '../components/CalendarView';
 import { useUser } from '../context/UserContext';
 
 function Home() {
@@ -67,15 +68,24 @@ function Home() {
   useEffect(() => {
     const fetchCalendar = async () => {
       if (!isConnected) return;
-
+  
       try {
         const response = await fetch(`${API_BASE_URL}/calendar`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-
+  
         if (response.ok) {
           const data = await response.json();
-          setCalendarEvents(data);
+          console.log("Raw calendar data:", data);
+          setCalendarEvents(
+            data.map(event => ({
+              title: event.subject,
+              start: new Date(event.start.dateTime),
+              end: event.end?.dateTime ? new Date(event.end.dateTime) : null,
+              location: event.location?.displayName || "N/A",
+              description: event.bodyPreview || "", // Optional description
+            }))
+          );
         } else {
           console.error("Error fetching calendar events:", await response.text());
           if (response.status === 401) {
@@ -88,7 +98,7 @@ function Home() {
         console.error("Error fetching calendar:", error);
       }
     };
-
+  
     fetchCalendar();
   }, [isConnected, API_BASE_URL]);
 
@@ -120,19 +130,14 @@ function Home() {
       </div>
       <div className="meetings-section">
         <h2>Your Upcoming Meetings</h2>
-        {calendarEvents.length > 0 ? (
-          <ul>
-            {calendarEvents.map((event, idx) => (
-              <li key={idx}>
-                <strong>{event.subject}</strong>
-                <p>{new Date(event.start.dateTime).toLocaleString()}</p>
-                <p>{event.location.displayName || "N/A"}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No upcoming events found.</p>
-        )}
+        {/* {calendarEvents.map((event, idx) => (
+          <li key={idx}>
+            <strong>{event.title}</strong>
+            <p>{new Date(event.start).toLocaleString()}</p>
+            <p>Location: {event.location}</p>
+          </li>
+        ))} */}
+        <CalendarView events={calendarEvents} />
       </div>
     </div>
   );

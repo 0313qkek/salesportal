@@ -236,7 +236,7 @@ app.post("/users/update-profile", upload.single("profilePicture"), authenticateJ
 app.get('/auth/microsoft', async (req, res) => {
     try {
         const authUrl = await msalClient.getAuthCodeUrl({
-            scopes: ['User.Read', 'Calendars.Read'], // Add scopes based on your app's requirements
+            scopes: ['User.Read', 'Calendars.Read', 'Calendars.Read.Shared', 'Calendars.ReadBasic', 'Calendars.ReadWrite', 'Calendars.ReadWrite.Shared'],
             redirectUri: REDIRECT_URI,
         });
         console.log('Success!!');
@@ -257,7 +257,7 @@ app.get('/auth/microsoft/callback', async (req, res) => {
         const tokenResponse = await msalClient.acquireTokenByCode({
             code: code,
             redirectUri: REDIRECT_URI,
-            scopes: ['User.Read', 'Calendars.Read'],
+            scopes: ['User.Read', 'Calendars.Read', 'Calendars.Read.Shared', 'Calendars.ReadBasic', 'Calendars.ReadWrite', 'Calendars.ReadWrite.Shared'],
         });
 
         const { accessToken, refreshToken, idTokenClaims } = tokenResponse;
@@ -306,7 +306,7 @@ app.post('/refresh-token', async (req, res) => {
     try {
         const tokenResponse = await msalClient.acquireTokenByRefreshToken({
             refreshToken: refreshToken,
-            scopes: ['User.Read', 'Calendars.Read'],
+            scopes: ['User.Read', 'Calendars.Read', 'Calendars.Read.Shared', 'Calendars.ReadBasic', 'Calendars.ReadWrite', 'Calendars.ReadWrite.Shared'],
         });
 
         res.json({ accessToken: tokenResponse.accessToken });
