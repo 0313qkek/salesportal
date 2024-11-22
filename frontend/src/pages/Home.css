@@ -53,8 +53,16 @@
     font-size: 14px;
     margin-top: 4px;
   }
+
+  .connect-info {
+    font-size: 16px;
+    margin-top: 10px;
+    color: rgb(84, 81, 81);
+    font-size: 14px;
+    margin-top: 4px;
+  }
   
-  .view-profile-btn {
+  button {
     padding: 10px 20px;
     background-color: black;
     color: white;
@@ -63,7 +71,7 @@
     cursor: pointer;
   }
   
-  .view-profile-btn:hover {
+  button:hover {
     background-color: #333;
   }
 

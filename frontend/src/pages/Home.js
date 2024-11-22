@@ -9,7 +9,6 @@ function Home() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [userDetails, setUserDetails] = useState({});
   const [isConnected, setIsConnected] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
 
   const AUTH_URL = process.env.REACT_APP_AUTH_URL || 'https://localhost:4000/auth/microsoft';
@@ -18,7 +17,7 @@ function Home() {
   const handleViewProfile = () => setIsProfileModalOpen(true);
   const closeProfileModal = () => setIsProfileModalOpen(false);
 
-  // Capture token from URL and reload user context
+  // // Capture token from URL and reload user context
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
@@ -53,11 +52,21 @@ function Home() {
 
         if (!response.ok) throw new Error("Failed to check Microsoft connection.");
         const data = await response.json();
+        console.log("Microsoft connection data:", data);
         setIsConnected(data.connected);
+
+        if (data.connected) {
+          // Fetch user details after connection
+          const userResponse = await fetch(`${API_BASE_URL}/users/details`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          });
+          if (!userResponse.ok) throw new Error("Failed to fetch user details.");
+          const userData = await userResponse.json();
+          console.log("Fetched user details:", userData);
+          setUserDetails(userData);
+        }
       } catch (error) {
         console.error("Error checking Microsoft connection:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -68,12 +77,12 @@ function Home() {
   useEffect(() => {
     const fetchCalendar = async () => {
       if (!isConnected) return;
-  
+
       try {
         const response = await fetch(`${API_BASE_URL}/calendar`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
-  
+
         if (response.ok) {
           const data = await response.json();
           console.log("Raw calendar data:", data);
@@ -98,20 +107,9 @@ function Home() {
         console.error("Error fetching calendar:", error);
       }
     };
-  
+
     fetchCalendar();
   }, [isConnected, API_BASE_URL]);
-
-  if (loading) return <div>Loading...</div>;
-
-  if (!isConnected) {
-    return (
-      <div className="connect-container">
-        <h2>Connect to Microsoft Account</h2>
-        <button onClick={() => (window.location.href = AUTH_URL)}>Connect Microsoft Account</button>
-      </div>
-    );
-  }
 
   return (
     <div className="home-container">
@@ -130,6 +128,19 @@ function Home() {
       </div>
       <div className="meetings-section">
         <h2>Your Upcoming Meetings</h2>
+        <>
+          {!isConnected ? (
+            <>
+              <div className="connect-container">
+                <button onClick={() => (window.location.href = AUTH_URL)}>Connect Microsoft Account</button>
+                <p className='connect-info'>Please connect with Bunchful Microsoft account</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <CalendarView events={calendarEvents} />
+            </>)}
+        </>
         {/* {calendarEvents.map((event, idx) => (
           <li key={idx}>
             <strong>{event.title}</strong>
@@ -137,7 +148,6 @@ function Home() {
             <p>Location: {event.location}</p>
           </li>
         ))} */}
-        <CalendarView events={calendarEvents} />
       </div>
     </div>
   );

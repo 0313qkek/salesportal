@@ -81,8 +81,8 @@ function Register() {
 
                 <div className='section'>
                     <h3>Email and Phone Number</h3>
-                    <p>Enter the email and phone number you want to use for signing in.</p>
-                    <label>Email</label>
+                    <p>Enter Bunchful email and phone number you want to use for signing in.</p>
+                    <label>Bunchful Email</label>
                     <input 
                         type='email'
                         value={email}

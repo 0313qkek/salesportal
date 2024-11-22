@@ -1,42 +1,53 @@
-import React, { useState, useEffect }from 'react';
+import React, { useState, useEffect } from 'react';
 import './ProfileModal.css';
 import { useUser } from '../context/UserContext';
 
 function ProfileModal({ isOpen, closeModal }) {
     const { user, updateUserProfile } = useUser();
-    const [userFirstName, setUserFirstName] = useState('');
-    const [userLastName, setUserLastName] = useState('');
-    const [userPhone, setUserPhone] = useState('');
-    const [userGoal, setUserGoal] = useState('');
-    const [profilePicture, setProfilePicture] = useState(null);
+    const [userDetails, setUserDetails] = useState({});
     const [picturePreview, setPicturePreview] = useState("https://via.placeholder.com/100");
+
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:4000';
 
     useEffect(() => {
         if (user) {
-            setUserFirstName(user.firstName);
-            setUserLastName(user.lastName);
-            setUserPhone(user.phone);
-            setUserGoal(user.goal);
-            setPicturePreview(user.picture || "https://via.placeholder.com/100");
+            setUserDetails({
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phone: user.phone,
+                role: user.role,
+                goal: user.goal,
+                picture: user.picture || "https://via.placeholder.com/100",
+            });
         }
     }, [user]);
 
     const handlePictureChange = (e) => {
         const file = e.target.files[0];
-        setProfilePicture(file);
+        setUserDetails((prevDetails) => ({
+            ...prevDetails,
+            picture: file,
+        }));
         setPicturePreview(URL.createObjectURL(file));
+    };
+
+    const handleInputChange = (field, value) => {
+        setUserDetails((prevDetails) => ({
+            ...prevDetails,
+            [field]: value,
+        }));
     };
 
     const handleSaveChanges = async () => {
         const formData = new FormData();
-        formData.append("profilePicture", profilePicture);
-        formData.append("firstName", userFirstName);
-        formData.append("lastName", userLastName);
-        formData.append("phone", userPhone);
-        formData.append("goal", userGoal);
+        formData.append("profilePicture", userDetails.picture);
+        formData.append("firstName", userDetails.firstName);
+        formData.append("lastName", userDetails.lastName);
+        formData.append("phone", userDetails.phone);
+        formData.append("goal", userDetails.goal);
 
         try {
-            const response = await fetch("http://localhost:4000/users/update-profile", {
+            const response = await fetch(`${API_BASE_URL}/users/update-profile`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -59,23 +70,49 @@ function ProfileModal({ isOpen, closeModal }) {
         }
     };
 
+    useEffect(() => {
+        const checkMicrosoftConnection = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/check-connection`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                });
+
+                if (!response.ok) throw new Error("Failed to check Microsoft connection.");
+                const data = await response.json();
+
+                if (data.connected) {
+                    // Fetch user details after connection
+                    const userResponse = await fetch(`${API_BASE_URL}/users/details`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                    });
+                    if (!userResponse.ok) throw new Error("Failed to fetch user details.");
+                    const userData = await userResponse.json();
+                    setUserDetails(userData);
+                }
+            } catch (error) {
+                console.error("Error checking Microsoft connection:", error);
+            }
+        };
+
+        checkMicrosoftConnection();
+    }, [API_BASE_URL]);
+
     if (!isOpen) return null;
 
     return (
         <div className='modal'>
-
             <div className='modal-content'>
-
                 <div className='modal-header'>
                     <h2>Profile Settings</h2>
                     <span className='close' onClick={closeModal}>&times;</span>
                 </div>
 
                 <div className='user-picture'>
-                    <img 
-                        className='profile-picture' 
+                    <img
+                        className='profile-picture'
                         src={picturePreview}
-                        alt="Profile" />
+                        alt="Profile"
+                    />
                     <div className='edit-picture'>
                         <h3>Profile Picture</h3>
                         <p>We support PNGs, JPEGs, and GIFs under 10MB</p>
@@ -86,45 +123,44 @@ function ProfileModal({ isOpen, closeModal }) {
                 <div className='user-details'>
                     <div className='input-group'>
                         <label>First Name</label>
-                        <input 
+                        <input
                             type='text'
-                            value={userFirstName}
-                            onChange={(e) => setUserFirstName(e.target.value)}
-                            placeholder={userFirstName}
+                            value={userDetails.firstName}
+                            onChange={(e) => handleInputChange('firstName', e.target.value)}
+                            placeholder="First Name"
                         />
                     </div>
                     <div className='input-group'>
                         <label>Last Name</label>
-                        <input 
+                        <input
                             type='text'
-                            value={userLastName}
-                            onChange={(e) => setUserLastName(e.target.value)}
-                            placeholder={userLastName}
+                            value={userDetails.lastName}
+                            onChange={(e) => handleInputChange('lastName', e.target.value)}
+                            placeholder="Last Name"
                         />
                     </div>
                     <div className='input-group'>
                         <label>Phone Number</label>
-                        <input 
+                        <input
                             type='text'
-                            value={userPhone}
-                            onChange={(e) => setUserPhone(e.target.value)}
-                            placeholder={userPhone}
+                            value={userDetails.phone}
+                            onChange={(e) => handleInputChange('phone', e.target.value)}
+                            placeholder="Phone Number"
                         />
                     </div>
                     <div className='input-group'>
                         <label>Goal</label>
-                        <textarea 
+                        <textarea
                             type='text'
-                            value={userGoal}
-                            onChange={(e) => setUserGoal(e.target.value)}
-                            placeholder={userGoal}
+                            value={userDetails.goal}
+                            onChange={(e) => handleInputChange('goal', e.target.value)}
+                            placeholder="Your Goal"
                         />
                     </div>
                 </div>
 
                 <button className='edit-profile-btn' onClick={handleSaveChanges}>Edit Profile</button>
             </div>
-
         </div>
     );
 }

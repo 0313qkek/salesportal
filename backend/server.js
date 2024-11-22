@@ -194,25 +194,63 @@ app.post("/users/update-profile", upload.single("profilePicture"), authenticateJ
     const userId = req.userId; // Access the user ID directly from req.userId
 
     try {
+        let query, params;
+
+        // Determine whether userId is an integer (id) or UUID (microsoft_id)
+        if (/^\d+$/.test(userId)) {
+            // If userId is numeric, it's an `id` (integer)
+            query = `SELECT picture FROM users WHERE id = $1`;
+            params = [parseInt(userId, 10)];
+        } else {
+            // Otherwise, userId is a `microsoft_id` (UUID)
+            query = `SELECT picture FROM users WHERE microsoft_id = $1`;
+            params = [userId];
+        }
+
         // Fetch the current user from the database
-        const result = await pool.query("SELECT picture FROM users WHERE id = $1", [userId]);
+        const result = await pool.query(query, params);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
         const currentUser = result.rows[0];
 
         // Use the existing picture if no new one is uploaded
         const profilePicturePath = req.file ? req.file.path : currentUser.picture || "https://via.placeholder.com/100";
 
+        // Prepare the update query
+        if (/^\d+$/.test(userId)) {
+            // Update by `id` (integer)
+            query = `
+                UPDATE users 
+                SET firstName = $1, lastName = $2, phone = $3, goal = $4, picture = $5 
+                WHERE id = $6 
+                RETURNING *`;
+            params = [firstName, lastName, phone, goal, profilePicturePath, parseInt(userId, 10)];
+        } else {
+            // Update by `microsoft_id` (UUID)
+            query = `
+                UPDATE users 
+                SET firstName = $1, lastName = $2, phone = $3, goal = $4, picture = $5 
+                WHERE microsoft_id = $6 
+                RETURNING *`;
+            params = [firstName, lastName, phone, goal, profilePicturePath, userId];
+        }
+
         // Update the user's data in the database
-        const updateResult = await pool.query(
-            `UPDATE users SET firstName = $1, lastName = $2, phone = $3, goal = $4, picture = $5 WHERE id = $6 RETURNING *`,
-            [firstName, lastName, phone, goal, profilePicturePath, userId]
-        );
+        const updateResult = await pool.query(query, params);
+
+        if (updateResult.rows.length === 0) {
+            return res.status(500).json({ message: "Failed to update profile" });
+        }
 
         const updatedUser = updateResult.rows[0];
 
         // Generate a new token with updated user information
         const newToken = jwt.sign(
             {
-                userId: updatedUser.id,
+                userId: updatedUser.id || updatedUser.microsoft_id,
                 firstName: updatedUser.firstname,
                 lastName: updatedUser.lastname,
                 email: updatedUser.email,
@@ -232,6 +270,58 @@ app.post("/users/update-profile", upload.single("profilePicture"), authenticateJ
     }
 });
 
+app.get('/users/details', authenticateJWT, async (req, res) => {
+    try {
+        const userId = req.userId; // Can be `id` (integer) or `microsoft_id` (UUID)
+        console.log("Fetching user details for:", userId);
+
+        let query, params;
+
+        // Check if `userId` is an integer (database `id`) or a UUID (`microsoft_id`)
+        if (/^\d+$/.test(userId)) {
+            // Numeric `userId` -> Treat as `id`
+            query = `
+                SELECT id, firstname, lastname, email, phone, role, goal, picture 
+                FROM users 
+                WHERE id = $1
+            `;
+            params = [parseInt(userId, 10)];
+        } else {
+            // UUID `userId` -> Treat as `microsoft_id`
+            query = `
+                SELECT id, firstname, lastname, email, phone, role, goal, picture 
+                FROM users 
+                WHERE microsoft_id = $1
+            `;
+            params = [userId];
+        }
+
+        const result = await pool.query(query, params);
+
+        if (result.rows.length === 0) {
+            console.warn("User not found for identifier:", userId);
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const user = result.rows[0];
+
+        // Respond with the user details
+        res.status(200).json({
+            id: user.id,
+            firstName: user.firstname,
+            lastName: user.lastname,
+            email: user.email,
+            phone: user.phone,
+            role: user.role,
+            goal: user.goal,
+            picture: user.picture,
+        });
+    } catch (err) {
+        console.error("Error fetching user details:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
 // Microsoft Authentication
 app.get('/auth/microsoft', async (req, res) => {
     try {
@@ -239,7 +329,6 @@ app.get('/auth/microsoft', async (req, res) => {
             scopes: ['User.Read', 'Calendars.Read', 'Calendars.Read.Shared', 'Calendars.ReadBasic', 'Calendars.ReadWrite', 'Calendars.ReadWrite.Shared'],
             redirectUri: REDIRECT_URI,
         });
-        console.log('Success!!');
         res.redirect(authUrl);
     } catch (err) {
         console.error('Error generating auth URL:', err);

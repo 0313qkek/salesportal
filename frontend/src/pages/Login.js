@@ -50,7 +50,7 @@ function Login({ onLogin }) {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        placeholder='Emal Address'
+                        placeholder='Bunchful Email Address'
                     />
                     <label>Password</label>
                     <div className='password-field'>

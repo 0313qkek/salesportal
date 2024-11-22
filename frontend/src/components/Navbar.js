@@ -22,13 +22,12 @@ import Mailwizz from '../pages/Mailwizz';
 import Settings from '../pages/Settings';
 
 function Navbar() {
+    const [userDetails, setUserDetails] = useState({});
     const [sidebar, setSidebar] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userFirstName, setUserFirstName] = useState('');
-    const [userLastName, setUserLastName] = useState('');
-    const [userEmail, setUserEmail] = useState('');
-    const [userPicture, setUserPicture] = useState('');
     const navigate = useNavigate();
+
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:4000';
 
     const showSidebar = () => setSidebar(!sidebar);
 
@@ -39,27 +38,59 @@ function Navbar() {
 
     const handleLogout = () => {
         setIsAuthenticated(false);
-        setUserFirstName('');
-        setUserEmail('');
+        setUserDetails({});
         localStorage.removeItem('token');
         navigate('/');
     };
-
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
-                const decoded = jwtDecode(token);
-                setUserFirstName(decoded.firstName);
-                setUserLastName(decoded.lastName);
-                setUserEmail(decoded.email);
-                setUserPicture(decoded.picture);
+                const decodedUser = jwtDecode(token);
                 setIsAuthenticated(true);
-            } catch (err) {
+                setUserDetails({
+                    firstName: decodedUser.firstName,
+                    lastName: decodedUser.lastName,
+                    email: decodedUser.email,
+                    role: decodedUser.role,
+                    goal: decodedUser.goal,
+                    picture: decodedUser.picture || "https://via.placeholder.com/100",
+                });
+            } catch (error) {
+                console.error("Invalid token:", error);
                 setIsAuthenticated(false);
             }
         }
-    }, [isAuthenticated]);
+    }, []);
+
+    // Check Microsoft connection and fetch user details
+    useEffect(() => {
+        const checkMicrosoftConnection = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/check-connection`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                });
+
+                if (!response.ok) throw new Error("Failed to check Microsoft connection.");
+                const data = await response.json();
+
+                if (data.connected) {
+                    // Fetch user details after connection
+                    const userResponse = await fetch(`${API_BASE_URL}/users/details`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                    });
+                    if (!userResponse.ok) throw new Error("Failed to fetch user details.");
+                    const userData = await userResponse.json();
+                    setUserDetails(userData);
+                    setIsAuthenticated(true);
+                }
+            } catch (error) {
+                console.error("Error checking Microsoft connection:", error);
+            }
+        };
+
+        checkMicrosoftConnection();
+    }, [API_BASE_URL]);
 
     return (
         <>
@@ -68,7 +99,7 @@ function Navbar() {
                     <div className={sidebar ? 'navbar-shifted' : 'navbar'}>
                         <IoMenu className='sidebar-toggler' onClick={showSidebar} />
                         <p className='title'>
-                            <span className='user-name'>Hello {userFirstName}!</span>
+                            <span className='user-name'>Hello {userDetails.firstName}!</span>
                             <br />
                             <span className='welcome'>Welcome back to Bunchful Sales Portal.</span>
                         </p>
@@ -100,12 +131,12 @@ function Navbar() {
                             <li className="user-profile">
                                 <img
                                     className="user-pic"
-                                    src={userPicture}
+                                    src={userDetails.picture}
                                     alt="User Profile"
                                 />
                                 <span className='user-details'>
-                                    <span className="user-name">{userFirstName} {userLastName}</span>
-                                    <span className="user-email">{userEmail}</span>
+                                    <span className="user-name">{userDetails.firstName} {userDetails.lastName}</span>
+                                    <span className="user-email">{userDetails.email}</span>
                                 </span>
                             </li>
                         </ul>
