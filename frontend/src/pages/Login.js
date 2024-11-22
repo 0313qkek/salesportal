@@ -14,7 +14,7 @@ function Login({ onLogin }) {
         e.preventDefault();
     
         try {
-            const response = await fetch('http://localhost:4000/users/login', {
+            const response = await fetch('https://localhost:4000/users/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -23,6 +23,7 @@ function Login({ onLogin }) {
 
             if (response.ok) {
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('refreshToken', data.refreshToken);
                 onLogin();
                 navigate('/home');
             } else {
@@ -42,7 +43,7 @@ function Login({ onLogin }) {
             </div>
             <div className='login-right'>
                 <form onSubmit={handleLogin}className='login-form'>
-                    <h3>Pleace enter your login details</h3>
+                    <h3>Please enter your login details</h3>
                     <label>Email Address</label>
                     <input 
                         type="email"
