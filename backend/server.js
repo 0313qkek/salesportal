@@ -431,14 +431,41 @@ app.get('/calendar', authenticateJWT, async (req, res) => {
 
         if (!accessToken) return res.status(404).json({ error: "Access token not found." });
 
-        const calendarResponse = await fetch("https://graph.microsoft.com/v1.0/me/calendar/events", {
-            headers: { Authorization: `Bearer ${accessToken}` },
-        });
+        const currentYear = new Date().getUTCFullYear();
+        const startYear = currentYear; // Start year for the range
+        const endYear = currentYear + 1; // End year for the range
+        const allEvents = [];
+        
+        for (let year = startYear; year <= endYear; year++) {
+            for (let month = 0; month < 12; month++) {
+                const startDate = new Date(Date.UTC(year, month, 1)).toISOString();
+                const endDate = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59)).toISOString();
 
-        if (!calendarResponse.ok) throw new Error("Failed to fetch calendar events");
+                let nextLink = `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${startDate}&endDateTime=${endDate}&$select=subject,body,bodyPreview,organizer,attendees,start,end,location`;
+                
+                while (nextLink) {
+                    const calendarResponse = await fetch(nextLink, {
+                        headers: { 
+                            Authorization: `Bearer ${accessToken}`,
+                            Prefer: 'outlook.timezone="Eastern Standard Time"',
+                        },
+                    });
 
-        const calendarData = await calendarResponse.json();
-        res.json(calendarData.value);
+                    if (!calendarResponse.ok) {
+                        const errorBody = await calendarResponse.text();
+                        console.error("API Error:", errorBody);
+                        throw new Error("Failed to fetch calendar events");
+                    }
+
+                    const calendarData = await calendarResponse.json();
+                    allEvents.push(...calendarData.value);
+
+                    nextLink = calendarData["@odata.nextLink"] || null; // Get the next page link
+                }
+            }
+        }
+
+        res.json(allEvents);
     } catch (err) {
         console.error("Error fetching calendar:", err);
         res.status(500).json({ error: "Error fetching calendar data" });
