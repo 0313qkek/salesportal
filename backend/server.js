@@ -335,6 +335,39 @@ app.post('/api/update-password', authenticateJWT, async (req, res) => {
     }
 });
 
+app.post('/api/update-timezone', authenticateJWT, async (req, res) => {
+    const { timeZone } = req.body;
+    const userId = req.userId;
+
+    if (!timeZone) {
+        return res.status(400).json({ error: 'Time zone is required.' });
+    }
+
+    try {
+        let query, params;
+
+        // Determine whether userId is an integer (id) or UUID (microsoft_id)
+        if (/^\d+$/.test(userId)) {
+            query = `UPDATE users SET timezone = $1 WHERE id = $2`;
+            params = [timeZone, parseInt(userId, 10)];
+        } else {
+            query = `UPDATE users SET timezone = $1 WHERE microsoft_id = $2`;
+            params = [timeZone, userId];
+        }
+
+        const result = await pool.query(query, params);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        res.status(200).json({ message: 'Time zone updated successfully.' });
+    } catch (error) {
+        console.error('Error updating time zone:', error);
+        res.status(500).json({ error: 'Server error.' });
+    }
+});
+
 // app.get
 app.get('/users/details', authenticateJWT, async (req, res) => {
     try {
@@ -492,8 +525,9 @@ app.get('/users/check-connection', authenticateJWT, async (req, res) => {
 // Fetch Calendar Events
 app.get('/calendar', authenticateJWT, async (req, res) => {
     try {
-        const result = await pool.query(`SELECT access_token FROM users WHERE microsoft_id = $1`, [req.userId]);
+        const result = await pool.query(`SELECT access_token, timezone FROM users WHERE microsoft_id = $1`, [req.userId]);
         const accessToken = result.rows[0]?.access_token;
+        const timeZone = result.rows[0]?.timezone;
 
         if (!accessToken) return res.status(404).json({ error: "Access token not found." });
 
@@ -513,7 +547,7 @@ app.get('/calendar', authenticateJWT, async (req, res) => {
                     const calendarResponse = await fetch(nextLink, {
                         headers: { 
                             Authorization: `Bearer ${accessToken}`,
-                            Prefer: 'outlook.timezone="Eastern Standard Time"',
+                            Prefer: `outlook.timezone="${timeZone}"`,
                         },
                     });
 

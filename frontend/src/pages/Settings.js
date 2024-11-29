@@ -1,26 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Settings.css';
 
 function Settings() {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [feedbackMessage, setFeedbackMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [timeZone, setTimeZone] = useState('');
+    const [timeZones, setTimeZones] = useState([]);
+
+    useEffect(() => {
+        // A static list of time zones
+        setTimeZones([
+            'UTC',
+            'America/New_York',
+            'America/Chicago',
+            'America/Los_Angeles',
+            'Europe/London',
+            'Europe/Berlin',
+            'Asia/Tokyo',
+            'Asia/Seoul',
+            'Australia/Sydney',
+        ]);
+    }, []);
 
     const handleUpdatePassword = async () => {
-        if (newPassword !== confirmPassword) {
-            setFeedbackMessage("New password and confirmation do not match.");
-            return;
-        }
-
-        if (!currentPassword || !newPassword) {
-            setFeedbackMessage("Please fill out all fields.");
-            return;
-        }
-
-        setIsLoading(true);
-        setFeedbackMessage('');
 
         try {
             const response = await fetch('/api/update-password', {
@@ -38,15 +41,35 @@ function Settings() {
             const data = await response.json();
 
             if (response.ok) {
-                setFeedbackMessage("Password updated successfully!");
+                alert("Password updated successfully!");
             } else {
-                setFeedbackMessage(data.error || "Failed to update password.");
+                alert(data.error || "Failed to update password.");
             }
         } catch (error) {
-            setFeedbackMessage("An error occurred. Please try again.");
+            alert("An error occurred. Please try again.");
             console.error(error);
-        } finally {
-            setIsLoading(false);
+        }
+    };
+
+    const handleTimeZoneChange = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/update-timezone', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ timeZone }),
+            });
+
+            if (response.ok) {
+                alert('Time zone updated successfully!');
+            } else {
+                alert('Failed to update time zone.');
+            }
+        } catch (error) {
+            console.error('Error updating time zone:', error);
         }
     };
 
@@ -82,17 +105,30 @@ function Settings() {
                         className="settings-input"
                         placeholder="Confirm new password"
                     />
-                    <button
-                        className="update-btn"
-                        onClick={handleUpdatePassword}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "Updating..." : "Update Password"}
+                    <button className="update-btn" onClick={handleUpdatePassword}>
+                        Update Password
                     </button>
-                    {feedbackMessage && (
-                        <p className="feedback-message">{feedbackMessage}</p>
-                    )}
                 </div>
+            </div>
+
+            <div className='settings-section'>
+                <h3>Time Zone</h3>
+                <p>Select your preferred time zone.</p>
+                <select
+                    className="settings-input"
+                    value={timeZone}
+                    onChange={(e) => setTimeZone(e.target.value)}
+                >
+                    <option value="">Select Time Zone</option>
+                    {timeZones.map((zone) => (
+                        <option key={zone} value={zone}>
+                            {zone}
+                        </option>
+                    ))}
+                </select>
+                <button className="update-btn" onClick={handleTimeZoneChange}>
+                    Update Time Zone
+                </button>
             </div>
         </div>
     );
