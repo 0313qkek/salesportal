@@ -270,6 +270,72 @@ app.post("/users/update-profile", upload.single("profilePicture"), authenticateJ
     }
 });
 
+app.post('/api/update-password', authenticateJWT, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.userId; // Access the user ID directly from the JWT
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Both current and new passwords are required." });
+    }
+
+    try {
+        let query, params;
+
+        // Determine whether userId is an integer (id) or UUID (microsoft_id)
+        if (/^\d+$/.test(userId)) {
+            // If userId is numeric, it's an `id` (integer)
+            query = `SELECT id, password FROM users WHERE id = $1`;
+            params = [parseInt(userId, 10)];
+        } else {
+            // Otherwise, userId is a `microsoft_id` (UUID)
+            query = `SELECT microsoft_id, password FROM users WHERE microsoft_id = $1`;
+            params = [userId];
+        }
+
+        // Fetch the user's current password from the database
+        const result = await pool.query(query, params);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const user = result.rows[0];
+
+        // Validate the current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: "Incorrect current password." });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Prepare the update query
+        if (/^\d+$/.test(userId)) {
+            // Update by `id` (integer)
+            query = `UPDATE users SET password = $1 WHERE id = $2`;
+            params = [hashedPassword, parseInt(userId, 10)];
+        } else {
+            // Update by `microsoft_id` (UUID)
+            query = `UPDATE users SET password = $1 WHERE microsoft_id = $2`;
+            params = [hashedPassword, userId];
+        }
+
+        // Update the user's password in the database
+        const updateResult = await pool.query(query, params);
+
+        if (updateResult.rowCount === 0) {
+            return res.status(500).json({ message: "Failed to update password." });
+        }
+
+        res.status(200).json({ message: "Password updated successfully." });
+    } catch (error) {
+        console.error("Error updating password:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// app.get
 app.get('/users/details', authenticateJWT, async (req, res) => {
     try {
         const userId = req.userId; // Can be `id` (integer) or `microsoft_id` (UUID)

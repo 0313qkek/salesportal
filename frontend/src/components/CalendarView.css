@@ -1,20 +1,85 @@
+/* Container styling for the calendar */
 .calendar-container {
-    margin: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-  }
-  
+  margin: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+/* Toolbar styling (navigation and title bar) */
+.fc .fc-toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+/* Event styling */
+.fc .fc-event {
+  background-color: #007bff; /* Set the event background color */
+  color: white; /* Event text color */
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: normal; /* Allow text wrapping inside events */
+  word-wrap: break-word; /* Ensure long words break inside the event box */
+  font-size: 12px; /* Adjust font size to fit in the event boxes */
+}
+
+/* Hover effect for events */
+.fc .fc-event:hover {
+  background-color: #0056b3; /* Slightly darker blue when hovering */
+  cursor: pointer;
+}
+
+/* Grid cells styling */
+.fc .fc-daygrid-day {
+  vertical-align: top; /* Align content to the top of each day cell */
+  padding: 2px; /* Add padding inside day cells */
+}
+
+/* Ensure text fits in the boxes without overflow */
+.fc .fc-event-title-container {
+  white-space: normal; /* Allow wrapping of the title text */
+  word-break: break-word; /* Break long words to prevent overflow */
+}
+
+/* Day headers (e.g., Sunday, Monday) */
+.fc .fc-col-header-cell {
+  font-weight: bold;
+  font-size: 14px; /* Adjust font size for day headers */
+  text-align: center;
+}
+
+/* Adjust the appearance of the current day */
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: #e6f7ff; /* Light blue for the current day */
+  border: 1px solid #007bff; /* Highlight with blue border */
+}
+
+/* Adjust the appearance of inactive days (from previous or next month) */
+.fc .fc-daygrid-day.fc-day-other {
+  opacity: 0.5; /* Dim days outside the current month */
+  background-color: #f9f9f9; /* Match the calendar background */
+}
+
+@media (max-width: 480px) {
+  /* Further compact calendar layout for extra small screens */
   .fc .fc-toolbar {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
+    flex-direction: column; /* Stack navigation and title */
+    gap: 3px;
   }
-  
+
   .fc .fc-event {
-    background-color: #007bff;
-    color: white;
-    padding: 2px 5px;
-    border-radius: 3px;
+    font-size: 8px; /* Smaller font size */
+    padding: 1px; /* Minimal padding */
   }
+
+  .fc .fc-daygrid-day {
+    height: 60px; /* Reduce day cell height further */
+  }
+
+  .calendar-container {
+    padding: 1px; /* Minimal padding */
+    border-width: 0.5px; /* Thinner border */
+  }
+}

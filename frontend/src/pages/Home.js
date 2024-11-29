@@ -10,6 +10,7 @@ function Home() {
   const [userDetails, setUserDetails] = useState({});
   const [isConnected, setIsConnected] = useState(false);
   const [calendarEvents, setCalendarEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const AUTH_URL = process.env.REACT_APP_AUTH_URL || 'https://localhost:4000/auth/microsoft';
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://localhost:4000';
@@ -77,24 +78,15 @@ function Home() {
   useEffect(() => {
     const fetchCalendar = async () => {
       if (!isConnected) return;
-
+  
       try {
         const response = await fetch(`${API_BASE_URL}/calendar`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}`, },
         });
-
+  
         if (response.ok) {
           const data = await response.json();
-          console.log("Raw calendar data:", data);
-          setCalendarEvents(
-            data.map(event => ({
-              title: event.subject,
-              start: new Date(event.start.dateTime),
-              end: event.end?.dateTime ? new Date(event.end.dateTime) : null,
-              location: event.location?.displayName || "N/A",
-              description: event.bodyPreview || "", // Optional description
-            }))
-          );
+          setCalendarEvents(data);
         } else {
           console.error("Error fetching calendar events:", await response.text());
           if (response.status === 401) {
@@ -105,9 +97,11 @@ function Home() {
         }
       } catch (error) {
         console.error("Error fetching calendar:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-
+  
     fetchCalendar();
   }, [isConnected, API_BASE_URL]);
 
@@ -138,16 +132,17 @@ function Home() {
             </>
           ) : (
             <>
-              <CalendarView events={calendarEvents} />
+            {isLoading ? (
+              <>
+                <p>Loading...</p>
+              </>
+            ): (
+              <>
+                <CalendarView events={calendarEvents}/>
+              </>
+            )}
             </>)}
         </>
-        {/* {calendarEvents.map((event, idx) => (
-          <li key={idx}>
-            <strong>{event.title}</strong>
-            <p>{new Date(event.start).toLocaleString()}</p>
-            <p>Location: {event.location}</p>
-          </li>
-        ))} */}
       </div>
     </div>
   );

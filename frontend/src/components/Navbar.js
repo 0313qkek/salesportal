@@ -34,6 +34,7 @@ function Navbar() {
     const handleLogin = () => {
         setIsAuthenticated(true);
         navigate('/home');
+        window.location.reload();
     };
 
     const handleLogout = () => {
