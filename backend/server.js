@@ -425,7 +425,14 @@ app.get('/users/details', authenticateJWT, async (req, res) => {
 app.get('/auth/microsoft', async (req, res) => {
     try {
         const authUrl = await msalClient.getAuthCodeUrl({
-            scopes: ['User.Read', 'Calendars.Read', 'Calendars.Read.Shared', 'Calendars.ReadBasic', 'Calendars.ReadWrite', 'Calendars.ReadWrite.Shared'],
+            scopes: [
+                'User.Read', 
+                'Calendars.Read', 
+                'Calendars.ReadBasic', 
+                'Calendars.ReadWrite',
+                'Sites.Read.All', 
+                'Sites.ReadWrite.All',
+            ],
             redirectUri: REDIRECT_URI,
         });
         res.redirect(authUrl);
@@ -445,7 +452,16 @@ app.get('/auth/microsoft/callback', async (req, res) => {
         const tokenResponse = await msalClient.acquireTokenByCode({
             code: code,
             redirectUri: REDIRECT_URI,
-            scopes: ['User.Read', 'Calendars.Read', 'Calendars.Read.Shared', 'Calendars.ReadBasic', 'Calendars.ReadWrite', 'Calendars.ReadWrite.Shared'],
+            scopes: [
+                'User.Read', 
+                'Calendars.Read', 
+                'Calendars.Read.Shared', 
+                'Calendars.ReadBasic', 
+                'Calendars.ReadWrite', 
+                'Calendars.ReadWrite.Shared', 
+                'Sites.Read.All', 
+                'Sites.ReadWrite.All',
+            ],
         });
 
         const { accessToken, refreshToken, idTokenClaims } = tokenResponse;
@@ -494,7 +510,16 @@ app.post('/refresh-token', async (req, res) => {
     try {
         const tokenResponse = await msalClient.acquireTokenByRefreshToken({
             refreshToken: refreshToken,
-            scopes: ['User.Read', 'Calendars.Read', 'Calendars.Read.Shared', 'Calendars.ReadBasic', 'Calendars.ReadWrite', 'Calendars.ReadWrite.Shared'],
+            scopes: [
+                'User.Read', 
+                'Calendars.Read', 
+                'Calendars.Read.Shared', 
+                'Calendars.ReadBasic', 
+                'Calendars.ReadWrite', 
+                'Calendars.ReadWrite.Shared', 
+                'Sites.Read.All', 
+                'Sites.ReadWrite.All',
+            ],
         });
 
         res.json({ accessToken: tokenResponse.accessToken });
@@ -564,11 +589,41 @@ app.get('/calendar', authenticateJWT, async (req, res) => {
                 }
             }
         }
-
         res.json(allEvents);
     } catch (err) {
         console.error("Error fetching calendar:", err);
         res.status(500).json({ error: "Error fetching calendar data" });
+    }
+});
+
+// Fetch SharePoint Files
+app.get('/shared-files', authenticateJWT, async (req, res) => {
+    try {
+        const result = await pool.query(`SELECT access_token FROM users WHERE microsoft_id = $1`, [req.userId]);
+        const accessToken = result.rows[0]?.access_token;
+
+        if (!accessToken) return res.status(404).json({ error: "Access token not found." });
+
+        const siteId = "bunchful.sharepoint.com,25364828-c42b-4ab2-9c7c-c2dfa1110c1e,8500a2a7-c69d-445c-9037-cd5fa7ef3a5f" // Web Developer siteId
+        const driveId = "b!KEg2JSvEskqcfMLfoREMHqeiAIWdxlxEkDfNX6fvOl_FgmLpdX3xTbVLhgznhHGh" // Web Developer driveId
+
+        const response = await fetch(`https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/root/children`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            console.error("Error fetching SharePoint files:", errorBody);
+            return res.status(response.status).json({ error: "Failed to fetch files from SharePoint" });
+        }
+
+        const data = await response.json();
+        res.json(data.value);
+    } catch (err) {
+        console.error("Error fetching shared files:", err);
+        res.status(500).json({ error: "Error fetching share point data"});
     }
 });
 
