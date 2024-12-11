@@ -5,9 +5,21 @@ import './CalendarView.css';
 import { RRule } from 'rrule';
 import { DateTime } from 'luxon';
 
+/**
+ * CalendarView component
+ * @param {Array} events - List of events to display on the calendar
+ * @param {String} timeZone - Time zone for displaying events
+ * @returns 
+ */
 const CalendarView = ({ events, timeZone }) => {
+  /**
+   * Expands recurring evetns into individual occurrences.
+   * @param {Object} event - Event object, including recurrence details.
+   * @returns {Array} Array of individual event instances for FullCalendar.
+   */
   const expandRecurringEvents = (event) => {
     try {
+      // Check if the event has recurrence data
       if (
         event.recurrence &&
         event.recurrence.pattern &&
@@ -16,12 +28,14 @@ const CalendarView = ({ events, timeZone }) => {
       ) {
         const { interval, daysOfWeek } = event.recurrence.pattern;
         const { startDate, endDate, numberOfOccurrences } = event.recurrence.range;
-  
+
+        // Validate required recurrence data
         if (!startDate || !daysOfWeek || daysOfWeek.length === 0) {
           console.warn('Invalid recurrence data for event:', event);
           return [event]; // Return original event if data is incomplete
         }
-  
+
+        // Map day names to RRUle weekday constants
         const dayMap = {
           sunday: RRule.SU,
           monday: RRule.MO,
@@ -31,18 +45,21 @@ const CalendarView = ({ events, timeZone }) => {
           friday: RRule.FR,
           saturday: RRule.SA,
         };
-  
+
+        // Convert daysOfWeek
         const rruleDays = daysOfWeek.map((day) => dayMap[day.toLowerCase()]).filter(Boolean);
   
         if (rruleDays.length === 0) {
           console.warn('No valid weekdays found for recurrence:', event);
           return [event];
         }
-  
+
+        // Default end date
         const defaultEndDate = DateTime.fromISO(startDate)
           .plus({ years: 1 }) // Default to 1 year if no endDate is provided
           .toJSDate();
-  
+
+        // Create the recurrence rule
         const rule = new RRule({
           freq: RRule.WEEKLY,
           interval: interval || 1,
@@ -51,7 +68,8 @@ const CalendarView = ({ events, timeZone }) => {
           until: endDate !== '0001-01-01' ? new Date(endDate) : defaultEndDate,
           count: numberOfOccurrences || undefined,
         });
-  
+
+        // Generate individual occurrences based on the recurrence rule
         return rule.all().map((date) => ({
           title: event.subject || 'Untitled Event',
           start: DateTime.fromJSDate(date).toISO(),

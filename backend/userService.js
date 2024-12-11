@@ -2,12 +2,14 @@ const { pool } = require("./dbConfig");
 
 /**
  * Save or update user information from Microsoft account login.
+ * If a user with the given Microsoft ID exists, update their information; otherwise, create a new user.
  * @param {Object} user - User object containing Microsoft account details.
  */
 async function saveOrUpdateUserWithMicrosoftInfo(user) {
     const { microsoftId, email, firstName, lastName, phone, role, picture, goal, accessToken, refreshToken } = user;
 
     try {
+        // Check if a user with the given Microsoft ID already exists in the database
         const result = await pool.query(
             `SELECT * FROM users WHERE microsoft_id = $1`,
             [microsoftId]
@@ -37,27 +39,10 @@ async function saveOrUpdateUserWithMicrosoftInfo(user) {
     }
 }
 
-async function getUserByMicrosoftId(microsoftId) {
-    try {
-        const result = await pool.query(
-            `SELECT * FROM users WHERE microsoft_id = $1`,
-            [microsoftId]
-        );
-
-        if (result.rows.length > 0) {
-            return result.rows[0];
-        } else {
-            throw new Error("User not found.");
-        }
-    } catch (error) {
-        console.error("Error fetching user by Microsoft ID:", error);
-        throw error;
-    }
-}
-
 /**
- * Fetch user details by ID.
+ * Fetch user details by their database ID.
  * @param {Number} userId - User ID to fetch from the database.
+ * @returns {Object} User object if found.
  */
 async function getUserById(userId) {
     try {
@@ -77,10 +62,16 @@ async function getUserById(userId) {
     }
 }
 
+/**
+ * Update user profile information in the database.
+ * @param {Object} user - User object containing updated profile information.
+ * @returns {Object} Updated user object if successful.
+ */
 async function updateUserProfile(user) {
     const { id, firstName, lastName, phone, role, picture, goal } = user;
 
     try {
+        // Update the user's profile information in the database
         const result = await pool.query(
             `UPDATE users 
              SET firstName = $1, lastName = $2, phone = $3, role = $4, picture = $5, goal = $6
@@ -89,6 +80,7 @@ async function updateUserProfile(user) {
         );
 
         if (result.rows.length > 0) {
+            // Return the updated user information
             return result.rows[0];
         } else {
             throw new Error("Failed to update user profile.");

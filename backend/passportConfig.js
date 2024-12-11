@@ -2,31 +2,35 @@ const LocalStrategy = require("passport-local").Strategy;
 const { pool } = require("./dbConfig");
 const bcrypt = require("bcrypt");
 const { OIDCStrategy } = require("passport-azure-ad");
-const fetch = require("node-fetch");
 const { saveOrUpdateUserWithMicrosoftInfo } = require("./userService.js");
 
 function initialize(passport) {
-    // Local Strategy
+    // Local authentication strategy
     const authenticateUser = (email, password, done) => {
         pool.query(
             `SELECT * FROM users WHERE email = $1`, [email], (error, results) => {
                 if (error) { throw error; }
 
+                // Check if user exists in the database
                 if (results.rows.length > 0) {
                     const user = results.rows[0];
 
+                    // Compare the provided password with the stored hashed password
                     bcrypt.compare(password, user.password, (err, isMatch) => {
                         if (err) {
                             console.log(err);
                         }
 
                         if (isMatch) {
+                            // If passwords match, authentication is successful
                             return done(null, user);
                         } else {
+                            // If passwords do not match, return an error message
                             return done(null, false, { message: "Password is incorrect" });
                         }
                     });
                 } else {
+                    // If no user is found with the provided email, return an error message
                     return done(null, false, {
                         message: "No user with that email address"
                     });
@@ -35,6 +39,7 @@ function initialize(passport) {
         );
     };
 
+    // Registering the Local Strategy
     passport.use(
         new LocalStrategy(
             { usernameField: "email", passwordField: "password" },
@@ -42,6 +47,8 @@ function initialize(passport) {
         )
     );
 
+    
+    // Microsoft Azure AD OIDC Stretegy for OAuth-based authentication
     passport.use(
         new OIDCStrategy(
             {
@@ -67,12 +74,13 @@ function initialize(passport) {
                         accessToken,
                         refreshToken,
                     };
-    
+
+                    // Save or update the user in the database
                     await saveOrUpdateUserWithMicrosoftInfo(user);
-                    done(null, user);
+                    done(null, user); // Complete the authentication process
                 } catch (err) {
                     console.error("Error handling OAuth callback:", err);
-                    done(err);
+                    done(err); // Handle errors during authentication
                 }
             }
         )

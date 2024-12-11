@@ -7,35 +7,40 @@ const jwt = require("jsonwebtoken");
 const session = require("express-session");
 const flash = require("express-flash");
 const cors = require("cors");
-require("dotenv").config();
 const multer = require("multer");
 const { msalConfig, REDIRECT_URI } = require('./authConfig');
 const { ConfidentialClientApplication } = require('@azure/msal-node');
 const authRoutes = require('./routes/authRoutes');
 const https = require('https');
 const fs = require('fs');
+require("dotenv").config();
 
+// Load SSL credentials for HTTPS
 const key = fs.readFileSync('server.key'); // Path to private key
 const cert = fs.readFileSync('server.cert'); // Path to certificate
-
 const options = { key, cert };
 
-const msalClient = new ConfidentialClientApplication(msalConfig);
+// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Initialize Microsoft authentication client
+const msalClient = new ConfidentialClientApplication(msalConfig);
+
+// passportConfig.js configuration
 const initializePassport = require("./passportConfig");
 initializePassport(passport);
 
+// Configure Multure for file uploads
 const storage = multer.diskStorage({
     destination: "uploads/",
     filename: (req, file, cb) => {
         cb(null, Date.now() + "-" + file.originalname);
     },
 });
-
 const upload = multer({ storage });
 
+// Middleware to authenticate JWT tokens
 const authenticateJWT = (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
 
@@ -55,31 +60,28 @@ const authenticateJWT = (req, res, next) => {
     }
 };
 
+// Middleware setup
 app.use('/auth', authRoutes);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors()); 
-
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
-        cookie: {
-            secure: false,
-            httpOnly: true,
-        }
+        cookie: { secure: false, httpOnly: true },
     })
 );
-
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
+
+// User login endpoint
 app.post('/users/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -134,6 +136,7 @@ app.post('/users/login', async (req, res) => {
     }
 });
 
+// User registeration endpoint
 app.post("/users/register", async (req, res) => {
     const { firstName, lastName, email, phone, role, password, password2, microsoft_id, accessToken } = req.body;
     let errors = [];
@@ -189,6 +192,7 @@ app.post("/users/register", async (req, res) => {
     });
 });
 
+// User profile update endpoint
 app.post("/users/update-profile", upload.single("profilePicture"), authenticateJWT, async (req, res) => {
     const { firstName, lastName, phone, goal } = req.body;
     const userId = req.userId; // Access the user ID directly from req.userId
@@ -270,6 +274,7 @@ app.post("/users/update-profile", upload.single("profilePicture"), authenticateJ
     }
 });
 
+// User password update endpoint
 app.post('/api/update-password', authenticateJWT, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     const userId = req.userId; // Access the user ID directly from the JWT
@@ -335,6 +340,7 @@ app.post('/api/update-password', authenticateJWT, async (req, res) => {
     }
 });
 
+// User time zone update endpoint
 app.post('/api/update-timezone', authenticateJWT, async (req, res) => {
     const { timeZone } = req.body;
     const userId = req.userId;
@@ -368,7 +374,7 @@ app.post('/api/update-timezone', authenticateJWT, async (req, res) => {
     }
 });
 
-// app.get
+// Fetch user details by ID or Microsoft ID
 app.get('/users/details', authenticateJWT, async (req, res) => {
     try {
         const userId = req.userId; // Can be `id` (integer) or `microsoft_id` (UUID)
@@ -421,7 +427,7 @@ app.get('/users/details', authenticateJWT, async (req, res) => {
     }
 });
 
-// Microsoft Authentication
+// Redirect to Microsoft login page
 app.get('/auth/microsoft', async (req, res) => {
     try {
         const authUrl = await msalClient.getAuthCodeUrl({
@@ -442,6 +448,7 @@ app.get('/auth/microsoft', async (req, res) => {
     }
 });
 
+// Handle Microsoft authentication callback
 app.get('/auth/microsoft/callback', async (req, res) => {
     try {
         const code = req.query.code; // Extract the authorization code
@@ -502,7 +509,7 @@ app.get('/auth/microsoft/callback', async (req, res) => {
 });
 
 
-// Refresh Token Endpoint
+// Refresh Microsoft OAuth token
 app.post('/refresh-token', async (req, res) => {
     const { refreshToken } = req.body;
     if (!refreshToken) return res.status(400).json({ error: "Refresh token is required" });
